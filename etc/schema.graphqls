@@ -3,3 +3,7 @@ type Query {
         email: String @doc(description: "Customer email address")
     ): Customer @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\CustomerSearch") @doc(description: "Search for a customer by email")
 }
+
+type Customer {
+    customer_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\Customer") @doc(description: "The ID of the customer")
+}
