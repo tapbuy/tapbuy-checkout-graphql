@@ -1,0 +1,5 @@
+type Query {
+    tapbuyCustomerSearch(
+        email: String @doc(description: "Customer email address")
+    ): Customer @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\CustomerSearch") @doc(description: "Search for a customer by email")
+}
