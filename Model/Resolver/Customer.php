@@ -2,12 +2,11 @@
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
-use Magento\Framework\GraphQl\Query\ResolverInterface;
-use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\GraphQl\Query\ResolverInterface;
+use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
-
 
 class Customer implements ResolverInterface
 {
@@ -37,7 +36,7 @@ class Customer implements ResolverInterface
      * @param array|null $value The parent resolver's data, including the customer model.
      * @param array|null $args The arguments passed to the GraphQL query.
      * @throws \Exception If authorization fails.
-     * 
+     *
      * @return mixed The resolved value for the requested field or null if not found.
      */
     public function resolve(
@@ -52,12 +51,12 @@ class Customer implements ResolverInterface
         if (!isset($value['model'])) {
             return null;
         }
-        
+
         $customer = $value['model'];
         $fieldName = $field->getName();
-        
+
         switch ($fieldName) {
-            case 'customer_id':
+            case 'tapbuy_customer_id':
                 return $this->getCustomerId($customer);
 
             default:
@@ -75,5 +74,5 @@ class Customer implements ResolverInterface
     {
         return $customer->getId();
     }
-    
+
 }
