@@ -1,4 +1,7 @@
 type Query {
+    tapbuyGetOrder(
+        order_number: String @doc(description: "Order increment ID")
+    ): CustomerOrder @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrder") @doc(description: "Get order by order number")
     tapbuyCustomerSearch(
         email: String @doc(description: "Customer email address")
     ): Customer @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\CustomerSearch") @doc(description: "Search for a customer by email")
@@ -6,4 +9,8 @@ type Query {
 
 type Customer {
     tapbuy_customer_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\Customer") @doc(description: "The ID of the customer")
+}
+
+type CustomerOrder {
+    tapbuy_items: [OrderItemInterface] @doc(description: "An array containing the items purchased in this order") @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrderItems")
 }
