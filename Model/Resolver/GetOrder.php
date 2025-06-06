@@ -105,7 +105,12 @@ class GetOrder implements ResolverInterface
         if ($billingAddress) {
             $orderData['billing_address']['model'] = $billingAddress;
         }
-            
+
+        $paymentMethods = $order->getPayment();
+        if ($paymentMethods) {
+            $orderData['payment_methods'][0]['model'] = $paymentMethods;
+        }
+
         $orderData['model'] = $order;
 
         return $orderData;

@@ -18,3 +18,25 @@ type CustomerOrder {
 type OrderAddress {
     tapbuy_entity_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderAddress") @doc(description: "The ID of the order address")
 }
+
+type OrderPaymentMethod {
+    tapbuy_additional_information: TapbuyOrderPaymentMethodAdditionalInformation @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "Additional information related to the payment method")
+}
+
+type TapbuyOrderPaymentMethodAdditionalInformation {
+    guest_email: String @doc(description: "Guest email address associated with the payment")
+    cc_type: String @doc(description: "Credit card type used for the payment")
+    method_title: String @doc(description: "Title of the payment method")
+    _3d_active: Boolean @doc(description: "Indicates if 3D Secure was active for the payment")
+    result_code: String @doc(description: "Result code returned by the payment provider")
+    additional_data: TapbuyOrderPaymentMethodAdditionalData @doc(description: "Additional data related to the payment method")
+    psp_reference: String @doc(description: "Payment Service Provider reference")
+}
+
+type TapbuyOrderPaymentMethodAdditionalData {
+    issuer_country: String @doc(description: "Country of the card issuer")
+    card_bin: String @doc(description: "Bank Identification Number of the card")
+    card_holder_name: String @doc(description: "Name of the card holder")
+    card_summary: String @doc(description: "Summary of the card used")
+    payment_method: String @doc(description: "Payment method used")
+}

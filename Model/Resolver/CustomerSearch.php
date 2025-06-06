@@ -11,7 +11,6 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 
-
 class CustomerSearch implements ResolverInterface
 {
     /**
@@ -56,7 +55,7 @@ class CustomerSearch implements ResolverInterface
      * @param array|null $value
      * @param array|null $args
      * @throws \Exception
-     * 
+     *
      * @return mixed The result of the customer search query.
      */
     public function resolve(

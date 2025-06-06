@@ -10,7 +10,6 @@ use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 
 class Customer implements ResolverInterface
 {
-
     /**
      * @var TokenAuthorization
      */
@@ -52,7 +51,9 @@ class Customer implements ResolverInterface
             return null;
         }
 
+        /** @var \Magento\Customer\Model\Data\Customer $customer */
         $customer = $value['model'];
+        
         $fieldName = $field->getName();
 
         switch ($fieldName) {

@@ -41,7 +41,12 @@
             <argument name="orderItemProvider" xsi:type="object">Magento\SalesGraphQl\Model\OrderItem\DataProvider</argument>
         </arguments>
     </type>
-     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAddress">
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAddress">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderPaymentMethod">
         <arguments>
             <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
         </arguments>
