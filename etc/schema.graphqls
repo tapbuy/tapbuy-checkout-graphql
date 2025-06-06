@@ -14,3 +14,7 @@ type Customer {
 type CustomerOrder {
     tapbuy_items: [OrderItemInterface] @doc(description: "An array containing the items purchased in this order") @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrderItems")
 }
+
+type OrderAddress {
+    tapbuy_entity_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderAddress") @doc(description: "The ID of the order address")
+}

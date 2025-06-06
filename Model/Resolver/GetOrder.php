@@ -97,6 +97,15 @@ class GetOrder implements ResolverInterface
         }
 
         $orderData = $this->orderFormatter->format($order);
+        $shippingAddress = $order->getShippingAddress();
+        if ($shippingAddress) {
+            $orderData['shipping_address']['model'] = $shippingAddress;
+        }
+        $billingAddress = $order->getBillingAddress();
+        if ($billingAddress) {
+            $orderData['billing_address']['model'] = $billingAddress;
+        }
+            
         $orderData['model'] = $order;
 
         return $orderData;

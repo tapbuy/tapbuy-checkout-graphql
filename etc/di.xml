@@ -15,7 +15,7 @@
     <type name="Magento\CustomerGraphQl\Model\Resolver\Customer">
         <arguments>
             <argument name="customerResolvers" xsi:type="array">
-                <item name="customer_id" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Resolver\Customer</item>
+                <item name="tapbuy_customer_id" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Resolver\Customer</item>
             </argument>
         </arguments>
     </type>
@@ -39,6 +39,11 @@
             <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
             <argument name="valueFactory" xsi:type="object">Magento\Framework\GraphQl\Query\Resolver\ValueFactory</argument>
             <argument name="orderItemProvider" xsi:type="object">Magento\SalesGraphQl\Model\OrderItem\DataProvider</argument>
+        </arguments>
+    </type>
+     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAddress">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
 </config>
