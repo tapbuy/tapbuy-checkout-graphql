@@ -13,6 +13,7 @@ type Customer {
 
 type CustomerOrder {
     tapbuy_items: [OrderItemInterface] @doc(description: "An array containing the items purchased in this order") @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrderItems")
+    tapbuy_state: String @doc(description: "State of the order")
 }
 
 type OrderAddress {

@@ -111,6 +111,8 @@ class GetOrder implements ResolverInterface
             $orderData['payment_methods'][0]['model'] = $paymentMethods;
         }
 
+        $orderData['tapbuy_state'] = $order->getState();
+
         $orderData['model'] = $order;
 
         return $orderData;
