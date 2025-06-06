@@ -21,6 +21,7 @@ type OrderAddress {
 
 type OrderPaymentMethod {
     tapbuy_additional_information: TapbuyOrderPaymentMethodAdditionalInformation @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "Additional information related to the payment method")
+    tapbuy_amount_ordered: Float @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "The amount ordered for this payment method")
 }
 
 type TapbuyOrderPaymentMethodAdditionalInformation {

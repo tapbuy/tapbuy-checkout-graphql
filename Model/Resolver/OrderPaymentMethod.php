@@ -7,6 +7,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Magento\Sales\Model\Order\Payment;
 
 class OrderPaymentMethod implements ResolverInterface
 {
@@ -49,12 +50,31 @@ class OrderPaymentMethod implements ResolverInterface
             return null;
         }
 
-        /** @var \Magento\Sales\Model\Order\Payment $payment */
+        /** @var Payment $payment */
         $payment = $value['model'];
 
+        $fieldName = $field->getName();
+
+        switch ($fieldName) {
+            case 'tapbuy_additional_information':
+                return $this->getAdditionalInformation($payment);
+            case 'tapbuy_amount_ordered':
+                return $this->getAmountOrdered($payment);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Retrieves the additional information associated with the given payment.
+     *
+     * @param Payment $payment The payment object from which to extract additional information.
+     * @return array An array containing the additional information related to the payment.
+     */
+    private function getAdditionalInformation(Payment $payment): array
+    {
         $additionalInformation = $payment->getAdditionalInformation() ?? [];
         $additionalData = $additionalInformation['additionalData'] ?? [];
-
         return [
             'guest_email'     => $additionalInformation['guestEmail'] ?? null,
             'cc_type'         => $additionalInformation['cc_type'] ?? null,
@@ -71,4 +91,16 @@ class OrderPaymentMethod implements ResolverInterface
             ],
         ];
     }
+
+    /**
+     * Retrieves the total amount ordered associated with the given payment.
+     *
+     * @param Payment $payment The payment instance for which to get the ordered amount.
+     * @return float|null The total amount ordered, or null if not available.
+     */
+    private function getAmountOrdered(Payment $payment): ?float
+    {
+        return (float) $payment->getAmountOrdered() ?? null;
+    }
+
 }

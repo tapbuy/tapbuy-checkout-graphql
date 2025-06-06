@@ -53,7 +53,7 @@ class Customer implements ResolverInterface
 
         /** @var \Magento\Customer\Model\Data\Customer $customer */
         $customer = $value['model'];
-        
+
         $fieldName = $field->getName();
 
         switch ($fieldName) {
