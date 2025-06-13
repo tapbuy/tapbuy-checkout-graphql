@@ -111,6 +111,33 @@ class GetOrder implements ResolverInterface
             $orderData['payment_methods'][0]['model'] = $paymentMethods;
         }
 
+        $extensionAttributes = $order->getExtensionAttributes();
+        if ($extensionAttributes) {
+            $shippingAssignments = $extensionAttributes->getShippingAssignments();
+            if ($shippingAssignments) {
+                $orderData['tapbuy_shipping_assignments'] = [];
+                foreach ($shippingAssignments as $shippingAssignment) {
+                    $items = [];
+                    foreach ($shippingAssignment->getItems() as $item) {
+                        $items[] = [
+                            'item_id' => $item->getItemId(),
+                            'product_id' => $item->getProductId(),
+                        ];
+                    }
+                    $address = $shippingAssignment->getShipping()->getAddress()->getData() ?? null;
+                    if ($address) {
+                        $address['street'] = $shippingAssignment->getShipping()->getAddress()->getStreet();
+                        $address['country_code'] = $shippingAssignment->getShipping()->getAddress()->getCountryId();
+                    }
+                    $orderData['tapbuy_shipping_assignments'][] = [
+                        'method' => $shippingAssignment->getShipping()->getMethod(),
+                        'address' => $address,
+                        'items' => $items,
+                    ];
+                }
+            }
+        }
+
         $orderData['tapbuy_state'] = $order->getState();
 
         $orderData['model'] = $order;

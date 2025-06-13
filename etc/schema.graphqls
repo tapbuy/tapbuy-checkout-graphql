@@ -14,6 +14,7 @@ type Customer {
 type CustomerOrder {
     tapbuy_items: [OrderItemInterface] @doc(description: "An array containing the items purchased in this order") @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrderItems")
     tapbuy_state: String @doc(description: "State of the order")
+    tapbuy_shipping_assignments: [TapbuyOrderShippingAssignments]
 }
 
 type OrderAddress {
@@ -23,6 +24,17 @@ type OrderAddress {
 type OrderPaymentMethod {
     tapbuy_additional_information: TapbuyOrderPaymentMethodAdditionalInformation @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "Additional information related to the payment method")
     tapbuy_amount_ordered: Float @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "The amount ordered for this payment method")
+}
+
+type TapbuyOrderShippingAssignments {
+    items: [TapbuyOrderShippingAssignmentsItems]
+    method: String
+    address: OrderAddress
+}
+
+type TapbuyOrderShippingAssignmentsItems {
+    item_id: String
+    product_id: String
 }
 
 type TapbuyOrderPaymentMethodAdditionalInformation {
