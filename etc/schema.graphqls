@@ -54,3 +54,14 @@ type TapbuyOrderPaymentMethodAdditionalData {
     card_summary: String @doc(description: "Summary of the card used")
     payment_method: String @doc(description: "Payment method used")
 }
+
+input PaymentMethodInput {
+    tapbuy_additional_information: TapbuyAdditionalInformation @doc(description:"Additional data required for Tapbuy.")
+}
+
+input TapbuyAdditionalInformation {
+    accept_url: String @doc(description: "Payment accepted url")
+    pending_url: String @doc(description: "Payment pending url")
+    cancel_url: String @doc(description: "Payment canceled url")
+    exception_url: String @doc(description: "Payment exception url")
+}

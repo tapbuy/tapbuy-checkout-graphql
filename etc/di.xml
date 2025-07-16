@@ -51,4 +51,7 @@
             <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
+    <type name="Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart">
+        <plugin name="tapbuy_set_payment_additional_information" type="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin" />
+    </type>
 </config>
