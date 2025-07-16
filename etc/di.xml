@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\CustomerSearch">
+        <arguments>
+            <argument name="customerRepository" xsi:type="object">Magento\Customer\Api\CustomerRepositoryInterface</argument>
+            <argument name="extractCustomerData" xsi:type="object">Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\Customer">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+        </arguments>
+    </type>
+    <type name="Magento\CustomerGraphQl\Model\Resolver\Customer">
+        <arguments>
+            <argument name="customerResolvers" xsi:type="array">
+                <item name="tapbuy_customer_id" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Resolver\Customer</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization">
+        <arguments>
+            <argument name="requestInterface" xsi:type="object">Magento\Framework\App\RequestInterface</argument>
+            <argument name="tokenModelFactory" xsi:type="object">Magento\Integration\Model\Oauth\TokenFactory</argument>
+            <argument name="integrationService" xsi:type="object">Magento\Integration\Model\IntegrationService</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrder">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="orderRepository" xsi:type="object">Magento\Sales\Api\OrderRepositoryInterface</argument>
+            <argument name="orderFormatter" xsi:type="object">Magento\SalesGraphQl\Model\Formatter\Order</argument>
+            <argument name="searchCriteriaBuilder" xsi:type="object">Magento\Framework\Api\SearchCriteriaBuilder</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrderItems">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="valueFactory" xsi:type="object">Magento\Framework\GraphQl\Query\Resolver\ValueFactory</argument>
+            <argument name="orderItemProvider" xsi:type="object">Magento\SalesGraphQl\Model\OrderItem\DataProvider</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAddress">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderPaymentMethod">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+        </arguments>
+    </type>
+    <type name="Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart">
+        <plugin name="tapbuy_set_payment_additional_information" type="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin" />
+    </type>
+</config>

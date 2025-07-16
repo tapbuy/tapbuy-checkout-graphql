@@ -1,0 +1,67 @@
+type Query {
+    tapbuyGetOrder(
+        order_number: String @doc(description: "Order increment ID")
+    ): CustomerOrder @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrder") @doc(description: "Get order by order number")
+    tapbuyCustomerSearch(
+        email: String @doc(description: "Customer email address")
+    ): Customer @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\CustomerSearch") @doc(description: "Search for a customer by email")
+}
+
+type Customer {
+    tapbuy_customer_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\Customer") @doc(description: "The ID of the customer")
+}
+
+type CustomerOrder {
+    tapbuy_items: [OrderItemInterface] @doc(description: "An array containing the items purchased in this order") @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrderItems")
+    tapbuy_state: String @doc(description: "State of the order")
+    tapbuy_shipping_assignments: [TapbuyOrderShippingAssignments]
+}
+
+type OrderAddress {
+    tapbuy_entity_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderAddress") @doc(description: "The ID of the order address")
+}
+
+type OrderPaymentMethod {
+    tapbuy_additional_information: TapbuyOrderPaymentMethodAdditionalInformation @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "Additional information related to the payment method")
+    tapbuy_amount_ordered: Float @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderPaymentMethod") @doc(description: "The amount ordered for this payment method")
+}
+
+type TapbuyOrderShippingAssignments {
+    items: [TapbuyOrderShippingAssignmentsItems]
+    method: String
+    address: OrderAddress
+}
+
+type TapbuyOrderShippingAssignmentsItems {
+    item_id: String
+    product_id: String
+}
+
+type TapbuyOrderPaymentMethodAdditionalInformation {
+    guest_email: String @doc(description: "Guest email address associated with the payment")
+    cc_type: String @doc(description: "Credit card type used for the payment")
+    method_title: String @doc(description: "Title of the payment method")
+    _3d_active: Boolean @doc(description: "Indicates if 3D Secure was active for the payment")
+    result_code: String @doc(description: "Result code returned by the payment provider")
+    additional_data: TapbuyOrderPaymentMethodAdditionalData @doc(description: "Additional data related to the payment method")
+    psp_reference: String @doc(description: "Payment Service Provider reference")
+}
+
+type TapbuyOrderPaymentMethodAdditionalData {
+    issuer_country: String @doc(description: "Country of the card issuer")
+    card_bin: String @doc(description: "Bank Identification Number of the card")
+    card_holder_name: String @doc(description: "Name of the card holder")
+    card_summary: String @doc(description: "Summary of the card used")
+    payment_method: String @doc(description: "Payment method used")
+}
+
+input PaymentMethodInput {
+    tapbuy_additional_information: TapbuyAdditionalInformation @doc(description:"Additional data required for Tapbuy.")
+}
+
+input TapbuyAdditionalInformation {
+    accept_url: String @doc(description: "Payment accepted url")
+    pending_url: String @doc(description: "Payment pending url")
+    cancel_url: String @doc(description: "Payment canceled url")
+    exception_url: String @doc(description: "Payment exception url")
+}
