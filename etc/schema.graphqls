@@ -5,6 +5,7 @@ type Query {
     tapbuyCustomerSearch(
         email: String @doc(description: "Customer email address")
     ): Customer @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\CustomerSearch") @doc(description: "Search for a customer by email")
+    tapbuyModulesVersions: [TapbuyModuleVersion] @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\ModulesVersions") @doc(description: "Get versions of all installed Tapbuy modules")
 }
 
 type Customer {
@@ -64,4 +65,10 @@ input TapbuyAdditionalInformation {
     pending_url: String @doc(description: "Payment pending url")
     cancel_url: String @doc(description: "Payment canceled url")
     exception_url: String @doc(description: "Payment exception url")
+}
+
+type TapbuyModuleVersion {
+    name: String @doc(description: "Module name")
+    version: String @doc(description: "Module version from composer.json")
+    enabled: Boolean @doc(description: "Module is enabled")
 }
