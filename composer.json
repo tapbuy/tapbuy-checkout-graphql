@@ -2,7 +2,7 @@
     "name": "tapbuy/checkout-graphql",
     "description": "Tapbuy checkout module for Magento 2 GraphQL",
     "type": "magento2-module",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "license": [
         "OSL-3.0"
     ],
