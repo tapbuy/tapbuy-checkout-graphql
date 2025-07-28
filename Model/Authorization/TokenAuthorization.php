@@ -54,7 +54,7 @@ class TokenAuthorization
         if ($bearer) {
             $token = str_replace("Bearer ", "", $bearer);
         }
-        if (!$token) {
+        if (empty($token)) {
             throw new GraphQlAuthorizationException(__('Token is required.'));
         }
 
