@@ -8,6 +8,13 @@ type Query {
     tapbuyModulesVersions: [TapbuyModuleVersion] @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\ModulesVersions") @doc(description: "Get versions of all installed Tapbuy modules")
 }
 
+type Mutation {
+    tapbuyUnlockCart(
+        cart_id: String! @doc(description: "Cart ID to unlock")
+        unlock_reason: String @doc(description: "Reason for unlocking the cart")
+    ): TapbuyUnlockCartOutput @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\UnlockCart") @doc(description: "Unlock a cart and reactivate it")
+}
+
 type Customer {
     tapbuy_customer_id: Int @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\Customer") @doc(description: "The ID of the customer")
 }
@@ -71,4 +78,8 @@ type TapbuyModuleVersion {
     name: String @doc(description: "Module name")
     version: String @doc(description: "Module version from composer.json")
     enabled: Boolean @doc(description: "Module is enabled")
+}
+
+type TapbuyUnlockCartOutput {
+    cart: Cart @doc(description: "The unlocked cart")
 }
