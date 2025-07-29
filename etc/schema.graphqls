@@ -13,6 +13,9 @@ type Mutation {
         cart_id: String! @doc(description: "Cart ID to unlock")
         unlock_reason: String @doc(description: "Reason for unlocking the cart")
     ): TapbuyUnlockCartOutput @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\UnlockCart") @doc(description: "Unlock a cart and reactivate it")
+    tapbuyDeactivateCart(
+        cart_id: String! @doc(description: "Cart ID to deactivate")
+    ): TapbuyDeactivateCartOutput @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\DeactivateCart") @doc(description: "Deactivate a cart")
 }
 
 type Customer {
@@ -82,4 +85,8 @@ type TapbuyModuleVersion {
 
 type TapbuyUnlockCartOutput {
     cart: Cart @doc(description: "The unlocked cart")
+}
+
+type TapbuyDeactivateCartOutput {
+    cart: Cart @doc(description: "The deactivated cart")
 }
