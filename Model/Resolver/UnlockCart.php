@@ -9,7 +9,7 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\Order;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Helper\CartHelper;
@@ -22,9 +22,9 @@ class UnlockCart implements ResolverInterface
     private $tokenAuthorization;
 
     /**
-     * @var OrderFactory
+     * @var OrderCollectionFactory
      */
-    private $orderFactory;
+    private $orderCollectionFactory;
 
     /**
      * @var CartRepositoryInterface
@@ -43,20 +43,20 @@ class UnlockCart implements ResolverInterface
 
     /**
      * @param TokenAuthorization $tokenAuthorization
-     * @param OrderFactory $orderFactory
+     * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
      * @param CartHelper $cartHelper
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
-        OrderFactory $orderFactory,
+        OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
         CartHelper $cartHelper
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderFactory = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         $this->cartRepository = $cartRepository;
         $this->quoteFactory = $quoteFactory;
         $this->cartHelper = $cartHelper;
@@ -151,7 +151,7 @@ class UnlockCart implements ResolverInterface
      */
     private function getLatestOrderByQuoteId(string $quoteId): ?Order
     {
-        $orderCollection = $this->orderFactory->create()->getCollection();
+        $orderCollection = $this->orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('quote_id', $quoteId);
         // Filter out canceled and complete orders
         $orderCollection->addFieldToFilter('state', [
