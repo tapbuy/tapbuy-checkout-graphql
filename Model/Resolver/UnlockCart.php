@@ -160,7 +160,8 @@ class UnlockCart implements ResolverInterface
         $orderCollection->setOrder('created_at', 'DESC');
         $orderCollection->setPageSize(1);
 
-        return $orderCollection->getFirstItem()->getId() ? $orderCollection->getFirstItem() : null;
+        $order = $orderCollection->getFirstItem();
+        return $order->getId() ? $order : null;
     }
 
     /**
