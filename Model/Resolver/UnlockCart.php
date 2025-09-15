@@ -9,7 +9,8 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
+use Magento\Sales\Model\Order;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Helper\CartHelper;
 
@@ -21,9 +22,9 @@ class UnlockCart implements ResolverInterface
     private $tokenAuthorization;
 
     /**
-     * @var OrderFactory
+     * @var OrderCollectionFactory
      */
-    private $orderFactory;
+    private $orderCollectionFactory;
 
     /**
      * @var CartRepositoryInterface
@@ -42,20 +43,20 @@ class UnlockCart implements ResolverInterface
 
     /**
      * @param TokenAuthorization $tokenAuthorization
-     * @param OrderFactory $orderFactory
+     * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
      * @param CartHelper $cartHelper
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
-        OrderFactory $orderFactory,
+        OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
         CartHelper $cartHelper
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderFactory = $orderFactory;
+        $this->orderCollectionFactory = $orderCollectionFactory;
         $this->cartRepository = $cartRepository;
         $this->quoteFactory = $quoteFactory;
         $this->cartHelper = $cartHelper;
@@ -110,10 +111,10 @@ class UnlockCart implements ResolverInterface
      */
     private function updateOrderStatus(string $quoteId, ?string $unlockReason): void
     {
-        $order = $this->orderFactory->create();
-        $order->getResource()->load($order, $quoteId, 'quote_id');
+        // Get the most recent order for this quote
+        $order = $this->getLatestOrderByQuoteId($quoteId);
 
-        if ($order->getId()) {
+        if ($order && $order->getId()) {
             // Definition of the unlock reason
             $msgTxt = "Tapbuy Unlock: ";
             if ($unlockReason === 'cancel') {
@@ -140,6 +141,27 @@ class UnlockCart implements ResolverInterface
             // Set the status and save the order
             $order->setStatus($orderStatus)->save();
         }
+    }
+
+    /**
+     * Get the latest active order for a given quote ID
+     *
+     * @param string $quoteId
+     * @return Order|null
+     */
+    private function getLatestOrderByQuoteId(string $quoteId): ?Order
+    {
+        $orderCollection = $this->orderCollectionFactory->create();
+        $orderCollection->addFieldToFilter('quote_id', $quoteId);
+        // Filter out canceled and complete orders
+        $orderCollection->addFieldToFilter('state', [
+            'nin' => [Order::STATE_CANCELED, Order::STATE_COMPLETE, Order::STATE_CLOSED]
+        ]);
+        $orderCollection->setOrder('created_at', 'DESC');
+        $orderCollection->setPageSize(1);
+
+        $order = $orderCollection->getFirstItem();
+        return $order->getId() ? $order : null;
     }
 
     /**
