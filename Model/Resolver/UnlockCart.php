@@ -135,6 +135,8 @@ class UnlockCart implements ResolverInterface
                 $orderStatus = 'canceled';
             }
 
+            // Ensure the order is canceled, release stock, etc.
+            $order->cancel();
             // Set the status and save the order
             $order->setStatus($orderStatus)->save();
         }
