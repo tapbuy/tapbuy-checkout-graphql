@@ -111,10 +111,10 @@ class UnlockCart implements ResolverInterface
      */
     private function updateOrderStatus(string $quoteId, ?string $unlockReason): void
     {
-        // Get the most recent order for this quote
-        $order = $this->getLatestOrderByQuoteId($quoteId);
+        // Get all active orders for this quote
+        $orders = $this->getActiveOrdersByQuoteId($quoteId);
 
-        if ($order && $order->getId()) {
+        foreach ($orders as $order) {
             // Definition of the unlock reason
             $msgTxt = "Tapbuy Unlock: ";
             if ($unlockReason === 'cancel') {
@@ -144,12 +144,12 @@ class UnlockCart implements ResolverInterface
     }
 
     /**
-     * Get the latest active order for a given quote ID
+     * Get all active orders for a given quote ID
      *
      * @param string $quoteId
-     * @return Order|null
+     * @return Order[]
      */
-    private function getLatestOrderByQuoteId(string $quoteId): ?Order
+    private function getActiveOrdersByQuoteId(string $quoteId): array
     {
         $orderCollection = $this->orderCollectionFactory->create();
         $orderCollection->addFieldToFilter('quote_id', $quoteId);
@@ -158,10 +158,8 @@ class UnlockCart implements ResolverInterface
             'nin' => [Order::STATE_CANCELED, Order::STATE_COMPLETE, Order::STATE_CLOSED]
         ]);
         $orderCollection->setOrder('created_at', 'DESC');
-        $orderCollection->setPageSize(1);
 
-        $order = $orderCollection->getFirstItem();
-        return $order->getId() ? $order : null;
+        return $orderCollection->getItems();
     }
 
     /**
