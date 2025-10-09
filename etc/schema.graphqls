@@ -19,6 +19,7 @@ type Mutation {
     tapbuyOrderAssignCustomer(
         order_id: String! @doc(description: "Order entity ID or increment ID")
         customer_id: Int! @doc(description: "Customer entity ID")
+        order_identifier_type: String @doc(description: "Identifier type: auto, entity_id, or increment_id")
     ): TapbuyOrderAssignCustomerOutput @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\OrderAssignCustomer") @doc(description: "Assign a guest order to an existing customer")
 }
 

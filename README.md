@@ -150,7 +150,7 @@ query {
 #### Assign Guest Order to Customer
 ```graphql
 mutation {
-  tapbuyOrderAssignCustomer(order_id: "000000123", customer_id: 42) {
+  tapbuyOrderAssignCustomer(order_id: "000000123", customer_id: 42, order_identifier_type: "increment_id") {
     success
     order {
       id
@@ -161,7 +161,7 @@ mutation {
   }
 }
 ```
-> `order_id` accepts either the order entity ID or its increment ID.
+> `order_id` accepts either the order entity ID or its increment ID. Use `order_identifier_type` (`auto`, `entity_id`, or `increment_id`) to disambiguate when necessary.
 > The order email must match the customer's email address before assignment.
 
 #### Unlock Cart

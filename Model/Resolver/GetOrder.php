@@ -76,7 +76,7 @@ class GetOrder implements ResolverInterface
         $orderNumber = $args['order_number'];
 
         try {
-            $order = $this->orderLocator->getByIdentifier($orderNumber);
+            $order = $this->orderLocator->getByIdentifier($orderNumber, OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID);
         } catch (NoSuchEntityException $exception) {
             throw new GraphQlNoSuchEntityException(
                 __('Order with number "%increment_id" does not exist.', ['increment_id' => $orderNumber])

@@ -9,6 +9,10 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 
 class OrderLocator
 {
+    public const IDENTIFIER_TYPE_AUTO = 'auto';
+    public const IDENTIFIER_TYPE_ENTITY_ID = 'entity_id';
+    public const IDENTIFIER_TYPE_INCREMENT_ID = 'increment_id';
+
     /**
      * @var OrderRepositoryInterface
      */
@@ -31,27 +35,71 @@ class OrderLocator
      * Retrieve order by ID or increment ID.
      *
      * @param string $identifier
+     * @param string $identifierType
      * @return OrderInterface
      * @throws NoSuchEntityException
      */
-    public function getByIdentifier(string $identifier): OrderInterface
+    public function getByIdentifier(string $identifier, string $identifierType = self::IDENTIFIER_TYPE_AUTO): OrderInterface
     {
         $normalizedIdentifier = trim($identifier);
         if ($normalizedIdentifier === '') {
             throw new NoSuchEntityException(__('Order identifier is empty.'));
         }
 
-        if (ctype_digit($normalizedIdentifier)) {
-            $orderId = (int)$normalizedIdentifier;
-            if ($orderId > 0) {
-                try {
-                    return $this->orderRepository->get($orderId);
-                } catch (NoSuchEntityException $exception) {
-                    // Continue and try with increment ID below.
-                }
-            }
+        if ($identifierType === self::IDENTIFIER_TYPE_INCREMENT_ID) {
+            return $this->getByIncrementId($normalizedIdentifier, $identifier);
         }
 
+        if ($identifierType === self::IDENTIFIER_TYPE_ENTITY_ID) {
+            return $this->getByEntityId($normalizedIdentifier, $identifier);
+        }
+
+        // Auto mode: try increment ID first to preserve backwards compatibility and avoid collisions.
+        try {
+            return $this->getByIncrementId($normalizedIdentifier, $identifier);
+        } catch (NoSuchEntityException $exception) {
+            // fall back to entity ID if identifier looks numeric
+        }
+
+        return $this->getByEntityId($normalizedIdentifier, $identifier);
+    }
+
+    /**
+     * Retrieve order by entity ID.
+     *
+     * @param string $normalizedIdentifier
+     * @param string $originalIdentifier
+     * @return OrderInterface
+     * @throws NoSuchEntityException
+     */
+    private function getByEntityId(string $normalizedIdentifier, string $originalIdentifier): OrderInterface
+    {
+        if (!ctype_digit($normalizedIdentifier)) {
+            throw new NoSuchEntityException(
+                __('Order with identifier "%1" does not exist.', $originalIdentifier)
+            );
+        }
+
+        $orderId = (int)$normalizedIdentifier;
+        if ($orderId <= 0) {
+            throw new NoSuchEntityException(
+                __('Order with identifier "%1" does not exist.', $originalIdentifier)
+            );
+        }
+
+        return $this->orderRepository->get($orderId);
+    }
+
+    /**
+     * Retrieve order by increment ID.
+     *
+     * @param string $normalizedIdentifier
+     * @param string $originalIdentifier
+     * @return OrderInterface
+     * @throws NoSuchEntityException
+     */
+    private function getByIncrementId(string $normalizedIdentifier, string $originalIdentifier): OrderInterface
+    {
         $searchCriteriaBuilder = $this->searchCriteriaBuilderFactory->create();
         $searchCriteria = $searchCriteriaBuilder
             ->addFilter('increment_id', $normalizedIdentifier)
@@ -66,7 +114,7 @@ class OrderLocator
         }
 
         throw new NoSuchEntityException(
-            __('Order with identifier "%1" does not exist.', $identifier)
+            __('Order with identifier "%1" does not exist.', $originalIdentifier)
         );
     }
 }

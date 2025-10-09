@@ -95,9 +95,10 @@ class OrderAssignCustomer implements ResolverInterface
 
         $orderIdentifier = (string)$args['order_id'];
         $customerId = (int)$args['customer_id'];
+        $identifierType = $this->resolveIdentifierType($args['order_identifier_type'] ?? OrderLocator::IDENTIFIER_TYPE_AUTO);
 
         try {
-            $order = $this->orderLocator->getByIdentifier($orderIdentifier);
+            $order = $this->orderLocator->getByIdentifier($orderIdentifier, $identifierType);
         } catch (NoSuchEntityException $exception) {
             throw new GraphQlNoSuchEntityException(
                 __('Order with identifier "%order_id" does not exist.', ['order_id' => $orderIdentifier])
@@ -161,6 +162,38 @@ class OrderAssignCustomer implements ResolverInterface
                 __('Customer with ID "%customer_id" does not exist.', ['customer_id' => $customerId])
             );
         }
+    }
+
+    /**
+     * Resolve and validate the order identifier type argument.
+     *
+     * @param string|null $identifierType
+     * @return string
+     * @throws GraphQlInputException
+     */
+    private function resolveIdentifierType(?string $identifierType): string
+    {
+        if ($identifierType === null) {
+            return OrderLocator::IDENTIFIER_TYPE_AUTO;
+        }
+
+        $normalizedType = strtolower(trim($identifierType));
+        $allowedTypes = [
+            OrderLocator::IDENTIFIER_TYPE_AUTO,
+            OrderLocator::IDENTIFIER_TYPE_ENTITY_ID,
+            OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID,
+        ];
+
+        if (!in_array($normalizedType, $allowedTypes, true)) {
+            throw new GraphQlInputException(
+                __('Invalid order identifier type "%identifier_type". Allowed values: %allowed.', [
+                    'identifier_type' => $identifierType,
+                    'allowed' => implode(', ', $allowedTypes),
+                ])
+            );
+        }
+
+        return $normalizedType;
     }
 
 }
