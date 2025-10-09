@@ -13,6 +13,11 @@ The Tapbuy CheckoutGraphql module extends Magento 2's native GraphQL API with ad
 - **Order Retrieval**: Get order details by order number (including guest orders)
 - **Enhanced Customer Data**: Additional customer fields with custom resolvers
 
+### GraphQL Mutations
+- **Order Assignment**: Assign a previously guest order to an existing customer account
+- **Cart Unlock**: Reactivate a locked cart and reset its associated order status
+- **Cart Deactivation**: Disable an active cart to prevent further checkout actions
+
 ### GraphQL Types
 - **Customer Extensions**: Additional customer fields like `tapbuy_customer_id`
 - **Order Extensions**: Enhanced order data including custom shipping assignments and state information
@@ -140,6 +145,50 @@ query {
 }
 ```
 
+### GraphQL Mutations
+
+#### Assign Guest Order to Customer
+```graphql
+mutation {
+  tapbuyOrderAssignCustomer(order_id: "000000123", customer_id: 42) {
+    success
+    order {
+      id
+      number
+      customer_email
+      tapbuy_state
+    }
+  }
+}
+```
+> `order_id` accepts either the order entity ID or its increment ID.
+> The order email must match the customer's email address before assignment.
+
+#### Unlock Cart
+```graphql
+mutation {
+  tapbuyUnlockCart(cart_id: "ajed83Hs", unlock_reason: "cancel") {
+    cart {
+      id
+      is_active
+    }
+  }
+}
+```
+> Supply either a masked or numeric cart ID; `unlock_reason` is optional and impacts the resulting order status.
+
+#### Deactivate Cart
+```graphql
+mutation {
+  tapbuyDeactivateCart(cart_id: "ajed83Hs") {
+    cart {
+      id
+      is_active
+    }
+  }
+}
+```
+
 ### Payment Method Integration
 
 The module includes a plugin for `SetPaymentMethodOnCart` that handles additional Tapbuy payment information:
@@ -184,19 +233,22 @@ Tapbuy/CheckoutGraphql/
 ├── composer.json
 ├── registration.php
 ├── etc/
-│   ├── di.xml                 # Dependency injection configuration
-│   ├── module.xml             # Module declaration
-│   └── schema.graphqls        # GraphQL schema definitions
+│   ├── di.xml                       # Dependency injection configuration
+│   ├── module.xml                   # Module declaration
+│   └── schema.graphqls              # GraphQL schema definitions
 ├── Model/
 │   ├── Authorization/
-│   │   └── TokenAuthorization.php  # Token-based authorization logic
-│   └── Resolver/
-│       ├── Customer.php             # Customer field resolver
-│       ├── CustomerSearch.php       # Customer search resolver
-│       ├── GetOrder.php            # Order retrieval resolver
-│       ├── GetOrderItems.php       # Order items resolver
-│       ├── OrderAddress.php        # Order address resolver
-│       └── OrderPaymentMethod.php  # Payment method resolver
+│   │   └── TokenAuthorization.php   # Token-based authorization logic
+│   ├── Resolver/
+│   │   ├── Customer.php             # Customer field resolver
+│   │   ├── CustomerSearch.php       # Customer search resolver
+│   │   ├── GetOrder.php             # Order retrieval resolver
+│   │   ├── GetOrderItems.php        # Order items resolver
+│   │   ├── OrderAssignCustomer.php  # Guest order assignment resolver
+│   │   ├── OrderAddress.php         # Order address resolver
+│   │   └── OrderPaymentMethod.php   # Payment method resolver
+│   ├── OrderDataFormatter.php       # Shared formatter for enhanced order payloads
+│   └── OrderLocator.php             # Helper to locate orders by ID or increment ID
 └── Plugin/
     └── SetPaymentMethodOnCartPlugin.php  # Payment method plugin
 ```

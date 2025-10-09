@@ -2,16 +2,16 @@
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\SalesGraphQl\Model\Formatter\Order as OrderFormatter;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
+use Tapbuy\CheckoutGraphql\Model\OrderLocator;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class GetOrder implements ResolverInterface
 {
@@ -21,36 +21,28 @@ class GetOrder implements ResolverInterface
     private $tokenAuthorization;
 
     /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
-     * @var OrderFormatter
+     * @var OrderDataFormatter
      */
     private $orderFormatter;
 
     /**
-     * @var SearchCriteriaBuilder
+     * @var OrderLocator
      */
-    private $searchCriteriaBuilder;
+    private $orderLocator;
 
     /**
      * @param TokenAuthorization $tokenAuthorization
-     * @param OrderRepositoryInterface $orderRepository
-     * @param OrderFormatter $orderFormatter
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param OrderDataFormatter $orderFormatter
+     * @param OrderLocator $orderLocator
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
-        OrderRepositoryInterface $orderRepository,
-        OrderFormatter $orderFormatter,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        OrderDataFormatter $orderFormatter,
+        OrderLocator $orderLocator
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderRepository = $orderRepository;
         $this->orderFormatter = $orderFormatter;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->orderLocator = $orderLocator;
     }
 
     /**
@@ -70,7 +62,7 @@ class GetOrder implements ResolverInterface
      */
     public function resolve(
         Field $field,
-        $context,
+        ContextInterface $context,
         ResolveInfo $info,
         ?array $value = null,
         ?array $args = null
@@ -83,65 +75,14 @@ class GetOrder implements ResolverInterface
 
         $orderNumber = $args['order_number'];
 
-        $searchCriteria = $this->searchCriteriaBuilder
-            ->addFilter('increment_id', $orderNumber)
-            ->create();
-
-        $orders = $this->orderRepository->getList($searchCriteria)->getItems();
-        $order = reset($orders);
-
-        if (!$order || !$order->getEntityId()) {
+        try {
+            $order = $this->orderLocator->getByIdentifier($orderNumber);
+        } catch (NoSuchEntityException $exception) {
             throw new GraphQlNoSuchEntityException(
                 __('Order with number "%increment_id" does not exist.', ['increment_id' => $orderNumber])
             );
         }
 
-        $orderData = $this->orderFormatter->format($order);
-        $shippingAddress = $order->getShippingAddress();
-        if ($shippingAddress) {
-            $orderData['shipping_address']['model'] = $shippingAddress;
-        }
-        $billingAddress = $order->getBillingAddress();
-        if ($billingAddress) {
-            $orderData['billing_address']['model'] = $billingAddress;
-        }
-
-        $paymentMethods = $order->getPayment();
-        if ($paymentMethods) {
-            $orderData['payment_methods'][0]['model'] = $paymentMethods;
-        }
-
-        $extensionAttributes = $order->getExtensionAttributes();
-        if ($extensionAttributes) {
-            $shippingAssignments = $extensionAttributes->getShippingAssignments();
-            if ($shippingAssignments) {
-                $orderData['tapbuy_shipping_assignments'] = [];
-                foreach ($shippingAssignments as $shippingAssignment) {
-                    $items = [];
-                    foreach ($shippingAssignment->getItems() as $item) {
-                        $items[] = [
-                            'item_id' => $item->getItemId(),
-                            'product_id' => $item->getProductId(),
-                        ];
-                    }
-                    $address = $shippingAssignment->getShipping()->getAddress()->getData() ?? null;
-                    if ($address) {
-                        $address['street'] = $shippingAssignment->getShipping()->getAddress()->getStreet();
-                        $address['country_code'] = $shippingAssignment->getShipping()->getAddress()->getCountryId();
-                    }
-                    $orderData['tapbuy_shipping_assignments'][] = [
-                        'method' => $shippingAssignment->getShipping()->getMethod(),
-                        'address' => $address,
-                        'items' => $items,
-                    ];
-                }
-            }
-        }
-
-        $orderData['tapbuy_state'] = $order->getState();
-
-        $orderData['model'] = $order;
-
-        return $orderData;
+        return $this->orderFormatter->format($order);
     }
 }
