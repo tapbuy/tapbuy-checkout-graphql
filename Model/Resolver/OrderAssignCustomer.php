@@ -11,7 +11,6 @@ use Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\CustomerAssignment;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
@@ -23,11 +22,6 @@ class OrderAssignCustomer implements ResolverInterface
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
 
     /**
      * @var OrderDataFormatter
@@ -51,7 +45,6 @@ class OrderAssignCustomer implements ResolverInterface
 
     /**
      * @param TokenAuthorization $tokenAuthorization
-     * @param OrderRepositoryInterface $orderRepository
      * @param OrderDataFormatter $orderFormatter
      * @param CustomerRepositoryInterface $customerRepository
      * @param CustomerAssignment $customerAssignment
@@ -59,14 +52,12 @@ class OrderAssignCustomer implements ResolverInterface
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
-        OrderRepositoryInterface $orderRepository,
         OrderDataFormatter $orderFormatter,
         CustomerRepositoryInterface $customerRepository,
         CustomerAssignment $customerAssignment,
         OrderLocator $orderLocator
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderRepository = $orderRepository;
         $this->orderFormatter = $orderFormatter;
         $this->customerRepository = $customerRepository;
         $this->customerAssignment = $customerAssignment;
@@ -134,15 +125,13 @@ class OrderAssignCustomer implements ResolverInterface
             throw new GraphQlInputException(__($exception->getMessage()));
         }
 
-        $assignedOrder = $this->orderRepository->get((int)$order->getEntityId());
-
-        if ((int)$assignedOrder->getCustomerId() !== $customerId) {
+        if ((int)$order->getCustomerId() !== $customerId) {
             throw new GraphQlInputException(__('Failed to assign order to customer.'));
         }
 
         return [
             'success' => true,
-            'order' => $this->orderFormatter->format($assignedOrder)
+            'order' => $this->orderFormatter->format($order)
         ];
     }
 
