@@ -144,6 +144,7 @@ query {
   }
 }
 ```
+> Takes `order_number` or `order_id`
 
 ### GraphQL Mutations
 
