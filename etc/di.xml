@@ -29,9 +29,13 @@
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrder">
         <arguments>
             <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
-            <argument name="orderRepository" xsi:type="object">Magento\Sales\Api\OrderRepositoryInterface</argument>
-            <argument name="orderFormatter" xsi:type="object">Magento\SalesGraphQl\Model\Formatter\Order</argument>
-            <argument name="searchCriteriaBuilder" xsi:type="object">Magento\Framework\Api\SearchCriteriaBuilder</argument>
+            <argument name="orderFormatter" xsi:type="object">Tapbuy\CheckoutGraphql\Model\OrderDataFormatter</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAssignCustomer">
+        <arguments>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="orderFormatter" xsi:type="object">Tapbuy\CheckoutGraphql\Model\OrderDataFormatter</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrderItems">
