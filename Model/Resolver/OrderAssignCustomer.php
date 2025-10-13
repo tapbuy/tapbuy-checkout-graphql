@@ -69,7 +69,7 @@ class OrderAssignCustomer implements ResolverInterface
      */
     public function resolve(
         Field $field,
-        ContextInterface $context,
+        $context,
         ResolveInfo $info,
         ?array $value = null,
         ?array $args = null

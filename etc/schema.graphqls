@@ -1,6 +1,7 @@
 type Query {
     tapbuyGetOrder(
         order_number: String @doc(description: "Order increment ID")
+        order_id: String @doc(description: "Order entity ID")
     ): CustomerOrder @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\GetOrder") @doc(description: "Get order by order number")
     tapbuyCustomerSearch(
         email: String @doc(description: "Customer email address")

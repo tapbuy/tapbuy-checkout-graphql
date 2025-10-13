@@ -62,21 +62,22 @@ class GetOrder implements ResolverInterface
      */
     public function resolve(
         Field $field,
-        ContextInterface $context,
+        $context,
         ResolveInfo $info,
         ?array $value = null,
         ?array $args = null
     ) {
         $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
 
-        if (empty($args['order_number'])) {
+        if (empty($args['order_number']) && empty($args['order_id'])) {
             throw new GraphQlInputException(__('Order number is required'));
         }
 
-        $orderNumber = $args['order_number'];
+        $orderNumber = $args['order_number'] ?? $args['order_id'];
+        $identifierType = isset($args['order_id']) ? OrderLocator::IDENTIFIER_TYPE_ENTITY_ID : OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID;
 
         try {
-            $order = $this->orderLocator->getByIdentifier($orderNumber, OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID);
+            $order = $this->orderLocator->getByIdentifier($orderNumber, $identifierType);
         } catch (NoSuchEntityException $exception) {
             throw new GraphQlNoSuchEntityException(
                 __('Order with number "%increment_id" does not exist.', ['increment_id' => $orderNumber])
