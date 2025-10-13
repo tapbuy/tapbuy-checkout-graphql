@@ -70,7 +70,7 @@ class GetOrder implements ResolverInterface
         $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
 
         if (empty($args['order_number']) && empty($args['order_id'])) {
-            throw new GraphQlInputException(__('Order number is required'));
+            throw new GraphQlInputException(__('Either order_number or order_id is required'));
         }
 
         $orderNumber = $args['order_number'] ?? $args['order_id'];
