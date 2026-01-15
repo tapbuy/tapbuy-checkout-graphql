@@ -91,11 +91,16 @@ class UnlockCart implements ResolverInterface
         // Handle masked cart ID conversion first
         $cartId = $this->cartHelper->getRealCartId($args['cart_id']);
 
-        // Update order status if order exists
-        $this->updateOrderStatus($cartId, $unlockReason);
+        $cancelOrders = true;
+
+        if (!$unlockReason === 'update_payment_details') {
+            // Update order status if order exists
+            $this->updateOrderStatus($cartId, $unlockReason);
+            $cancelOrders = false;
+        }
 
         // Reactivate the cart
-        $cart = $this->reactivateCart($cartId);
+        $cart = $this->reactivateCart($cartId, $cancelOrders);
 
         return [
             'cart' => $cart
@@ -164,11 +169,13 @@ class UnlockCart implements ResolverInterface
 
     /**
      * Reactivate the cart
+     * With option to cancel associated orders
      *
      * @param string $cartId
+     * @param bool $cancelOrders
      * @return array
      */
-    private function reactivateCart(string $cartId): array
+    private function reactivateCart(string $cartId, bool $cancelOrders): array
     {
         try {
             $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
@@ -181,7 +188,10 @@ class UnlockCart implements ResolverInterface
         }
 
         if ($quote->getId()) {
-            $quote->setIsActive(1)->setReservedOrderId(null);
+            $quote->setIsActive(1);
+            if ($cancelOrders) {
+                $quote->setReservedOrderId(null);
+            }
             $this->cartRepository->save($quote);
         }
 
