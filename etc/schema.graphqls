@@ -101,3 +101,7 @@ type TapbuyOrderAssignCustomerOutput {
     success: Boolean! @doc(description: "Indicates if the order was successfully assigned")
     order: CustomerOrder @doc(description: "Order data after reassignment")
 }
+
+interface ProductInterface {
+    tapbuy_parent_sku: String @resolver(class: "Tapbuy\\CheckoutGraphql\\Model\\Resolver\\Product\\ParentSku") @doc(description: "The SKU of the parent configurable product for simple products that are variants")
+}
