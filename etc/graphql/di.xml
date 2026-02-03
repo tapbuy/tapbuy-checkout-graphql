@@ -58,12 +58,7 @@
             <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
         </arguments>
     </type>
-    <!-- Configure TapbuyLogger for classes with error handling -->
-    <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
-        <arguments>
-            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
-        </arguments>
-    </type>
+    <!-- Configure TapbuyLogger for Resolver classes with error handling -->
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\DeactivateCart">
         <arguments>
             <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
@@ -76,5 +71,10 @@
     </type>
     <type name="Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart">
         <plugin name="tapbuy_set_payment_additional_information" type="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin" />
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
     </type>
 </config>
