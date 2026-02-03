@@ -12,6 +12,11 @@ use Magento\Sales\Model\Order\Payment;
 class OrderPaymentMethod implements ResolverInterface
 {
     /**
+     * Required ACL resource for viewing order payment methods
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -44,7 +49,7 @@ class OrderPaymentMethod implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!isset($value['model'])) {
             return null;

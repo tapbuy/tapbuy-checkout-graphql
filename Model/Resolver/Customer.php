@@ -11,6 +11,11 @@ use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 class Customer implements ResolverInterface
 {
     /**
+     * Required ACL resource for viewing customer data
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CUSTOMER_VIEW;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -45,7 +50,7 @@ class Customer implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Customer::customer');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!isset($value['model'])) {
             return null;

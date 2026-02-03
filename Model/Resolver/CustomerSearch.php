@@ -14,6 +14,11 @@ use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 class CustomerSearch implements ResolverInterface
 {
     /**
+     * Required ACL resource for searching customers
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CUSTOMER_SEARCH;
+
+    /**
      * @var CustomerRepositoryInterface
      */
     private $customerRepository;
@@ -65,7 +70,7 @@ class CustomerSearch implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Customer::customer');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['email'])) {
             throw new GraphQlInputException(__('Email is required'));

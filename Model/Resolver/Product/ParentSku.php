@@ -10,6 +10,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 
 /**
  * Resolver for parent_sku field on ProductInterface.
@@ -19,6 +20,16 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
  */
 class ParentSku implements ResolverInterface
 {
+    /**
+     * Required ACL resource for viewing order data (used when resolving product parent SKU in order context)
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+
+    /**
+     * @var TokenAuthorization
+     */
+    private TokenAuthorization $tokenAuthorization;
+
     /**
      * @var ConfigurableType
      */
@@ -30,13 +41,16 @@ class ParentSku implements ResolverInterface
     private ProductRepositoryInterface $productRepository;
 
     /**
+     * @param TokenAuthorization $tokenAuthorization
      * @param ConfigurableType $configurableType
      * @param ProductRepositoryInterface $productRepository
      */
     public function __construct(
+        TokenAuthorization $tokenAuthorization,
         ConfigurableType $configurableType,
         ProductRepositoryInterface $productRepository
     ) {
+        $this->tokenAuthorization = $tokenAuthorization;
         $this->configurableType = $configurableType;
         $this->productRepository = $productRepository;
     }
@@ -58,6 +72,8 @@ class ParentSku implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ): ?string {
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
+
         if (!isset($value['model'])) {
             return null;
         }

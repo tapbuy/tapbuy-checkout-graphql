@@ -16,6 +16,11 @@ use Magento\Framework\Exception\NoSuchEntityException;
 class GetOrder implements ResolverInterface
 {
     /**
+     * Required ACL resource for viewing orders
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -67,7 +72,7 @@ class GetOrder implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['order_number']) && empty($args['order_id'])) {
             throw new GraphQlInputException(__('Either order_number or order_id is required'));

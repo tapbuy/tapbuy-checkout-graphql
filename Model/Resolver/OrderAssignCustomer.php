@@ -19,6 +19,11 @@ use Tapbuy\CheckoutGraphql\Model\OrderLocator;
 class OrderAssignCustomer implements ResolverInterface
 {
     /**
+     * Required ACL resource for assigning orders to customers
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_ASSIGN;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -74,7 +79,7 @@ class OrderAssignCustomer implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_edit');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['order_id'])) {
             throw new GraphQlInputException(__('Order ID is required'));

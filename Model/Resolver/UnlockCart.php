@@ -18,6 +18,11 @@ use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 class UnlockCart implements ResolverInterface
 {
     /**
+     * Required ACL resource for unlocking carts
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_UNLOCK;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -89,7 +94,7 @@ class UnlockCart implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_edit');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['cart_id'])) {
             throw new GraphQlInputException(__('Cart ID is required'));

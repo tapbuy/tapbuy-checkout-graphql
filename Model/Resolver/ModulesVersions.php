@@ -17,6 +17,11 @@ use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 class ModulesVersions implements ResolverInterface
 {
     /**
+     * Required ACL resource for viewing module versions
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_MODULES_VERSIONS;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -90,7 +95,7 @@ class ModulesVersions implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ): array {
-        $this->tokenAuthorization->authorize('Magento_Backend::admin');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         $tapbuyModules = [];
         $allModules = $this->componentRegistrar->getPaths(ComponentRegistrar::MODULE);

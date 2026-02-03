@@ -16,6 +16,11 @@ use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 class DeactivateCart implements ResolverInterface
 {
     /**
+     * Required ACL resource for deactivating carts
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_DEACTIVATE;
+
+    /**
      * @var TokenAuthorization
      */
     private $tokenAuthorization;
@@ -79,7 +84,7 @@ class DeactivateCart implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_edit');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['cart_id'])) {
             throw new GraphQlInputException(__('Cart ID is required'));
