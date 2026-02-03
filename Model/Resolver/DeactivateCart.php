@@ -109,7 +109,7 @@ class DeactivateCart implements ResolverInterface
         try {
             $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
         } catch (\Exception $e) {
-            $this->logger->logException($e, 'Error loading cart for deactivation', [
+            $this->logger->logException('Error loading cart for deactivation', $e, [
                 'cart_id' => $cartId,
             ]);
             return [

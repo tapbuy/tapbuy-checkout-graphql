@@ -77,7 +77,7 @@ class SetPaymentMethodOnCartPlugin
                 ]);
             }
         } catch (\Exception $e) {
-            $this->logger->logException($e, 'Error setting Tapbuy additional information');
+            $this->logger->logException('Error setting Tapbuy additional information', $e);
         }
 
         return $result;
