@@ -13,6 +13,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Sales\Model\Order;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Helper\CartHelper;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class UnlockCart implements ResolverInterface
 {
@@ -42,24 +43,32 @@ class UnlockCart implements ResolverInterface
     private $cartHelper;
 
     /**
+     * @var TapbuyLogger
+     */
+    private $logger;
+
+    /**
      * @param TokenAuthorization $tokenAuthorization
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
      * @param CartHelper $cartHelper
+     * @param TapbuyLogger $logger
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
         OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
-        CartHelper $cartHelper
+        CartHelper $cartHelper,
+        TapbuyLogger $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->cartRepository = $cartRepository;
         $this->quoteFactory = $quoteFactory;
         $this->cartHelper = $cartHelper;
+        $this->logger = $logger;
     }
 
     /**
@@ -138,6 +147,11 @@ class UnlockCart implements ResolverInterface
                 $paymentMethodInstance = $order->getPayment()->getMethodInstance();
                 $orderStatus = $paymentMethodInstance->getConfigData($configDataKey);
             } catch (\Exception $e) {
+                $this->logger->warning('Checkout-GraphQL: Failed to get order status from payment method, using canceled', [
+                    'order_id' => $order->getIncrementId(),
+                    'config_key' => $configDataKey,
+                    'error' => $e->getMessage(),
+                ]);
                 $orderStatus = 'canceled';
             }
 
@@ -145,6 +159,12 @@ class UnlockCart implements ResolverInterface
             $order->cancel();
             // Set the status and save the order
             $order->setStatus($orderStatus)->save();
+
+            $this->logger->debug('Checkout-GraphQL: Updated order status during unlock', [
+                'order_id' => $order->getIncrementId(),
+                'new_status' => $orderStatus,
+                'unlock_reason' => $unlockReason,
+            ]);
         }
     }
 
@@ -180,6 +200,9 @@ class UnlockCart implements ResolverInterface
         try {
             $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
         } catch (\Exception $e) {
+            $this->logger->logException($e, 'Error loading cart for reactivation', [
+                'cart_id' => $cartId,
+            ]);
             return [
                 'model' => null,
                 'id' => null,
@@ -193,6 +216,11 @@ class UnlockCart implements ResolverInterface
                 $quote->setReservedOrderId(null);
             }
             $this->cartRepository->save($quote);
+
+            $this->logger->debug('Checkout-GraphQL: Reactivated cart', [
+                'cart_id' => $quote->getId(),
+                'cancel_orders' => $cancelOrders,
+            ]);
         }
 
         // Return basic cart data for the response

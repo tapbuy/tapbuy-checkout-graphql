@@ -11,6 +11,7 @@ use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
 use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Helper\CartHelper;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class DeactivateCart implements ResolverInterface
 {
@@ -35,21 +36,29 @@ class DeactivateCart implements ResolverInterface
     private $cartHelper;
 
     /**
+     * @var TapbuyLogger
+     */
+    private $logger;
+
+    /**
      * @param TokenAuthorization $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
      * @param CartHelper $cartHelper
+     * @param TapbuyLogger $logger
      */
     public function __construct(
         TokenAuthorization $tokenAuthorization,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
-        CartHelper $cartHelper
+        CartHelper $cartHelper,
+        TapbuyLogger $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->cartRepository = $cartRepository;
         $this->quoteFactory = $quoteFactory;
         $this->cartHelper = $cartHelper;
+        $this->logger = $logger;
     }
 
     /**
@@ -100,6 +109,9 @@ class DeactivateCart implements ResolverInterface
         try {
             $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
         } catch (\Exception $e) {
+            $this->logger->logException($e, 'Error loading cart for deactivation', [
+                'cart_id' => $cartId,
+            ]);
             return [
                 'model' => null,
                 'id' => null,
@@ -110,6 +122,10 @@ class DeactivateCart implements ResolverInterface
         if ($quote->getId()) {
             $quote->setIsActive(0);
             $this->cartRepository->save($quote);
+
+            $this->logger->debug('Checkout-GraphQL: Deactivated cart', [
+                'cart_id' => $quote->getId(),
+            ]);
         }
 
         // Return basic cart data for the response
