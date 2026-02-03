@@ -12,7 +12,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Model\Order\CustomerAssignment;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
 use Tapbuy\CheckoutGraphql\Model\OrderLocator;
 

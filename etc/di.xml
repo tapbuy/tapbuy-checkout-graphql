@@ -4,12 +4,12 @@
         <arguments>
             <argument name="customerRepository" xsi:type="object">Magento\Customer\Api\CustomerRepositoryInterface</argument>
             <argument name="extractCustomerData" xsi:type="object">Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData</argument>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\Customer">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
     <type name="Magento\CustomerGraphQl\Model\Resolver\Customer">
@@ -19,49 +19,59 @@
             </argument>
         </arguments>
     </type>
-    <type name="Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization">
-        <arguments>
-            <argument name="requestInterface" xsi:type="object">Magento\Framework\App\RequestInterface</argument>
-            <argument name="tokenModelFactory" xsi:type="object">Magento\Integration\Model\Oauth\TokenFactory</argument>
-            <argument name="integrationService" xsi:type="object">Magento\Integration\Model\IntegrationService</argument>
-        </arguments>
-    </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrder">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
             <argument name="orderFormatter" xsi:type="object">Tapbuy\CheckoutGraphql\Model\OrderDataFormatter</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAssignCustomer">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
             <argument name="orderFormatter" xsi:type="object">Tapbuy\CheckoutGraphql\Model\OrderDataFormatter</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\GetOrderItems">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
             <argument name="valueFactory" xsi:type="object">Magento\Framework\GraphQl\Query\Resolver\ValueFactory</argument>
             <argument name="orderItemProvider" xsi:type="object">Magento\SalesGraphQl\Model\OrderItem\DataProvider</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderAddress">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\OrderPaymentMethod">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
         </arguments>
     </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\ModulesVersions">
         <arguments>
-            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization</argument>
+            <argument name="tokenAuthorization" xsi:type="object">Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization</argument>
             <argument name="componentRegistrar" xsi:type="object">Magento\Framework\Component\ComponentRegistrar</argument>
             <argument name="file" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
             <argument name="json" xsi:type="object">Magento\Framework\Serialize\Serializer\Json</argument>
             <argument name="moduleManager" xsi:type="object">Magento\Framework\Module\Manager</argument>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+    <!-- Configure TapbuyLogger for classes with error handling -->
+    <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\DeactivateCart">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\UnlockCart">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
         </arguments>
     </type>
     <type name="Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart">
