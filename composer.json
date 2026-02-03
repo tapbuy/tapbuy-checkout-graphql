@@ -7,6 +7,14 @@
         "OSL-3.0"
     ],
     "require": {
+        "php": "^7.4 || ^8.1",
+        "magento/framework": "^103.0",
+        "magento/module-graphql": "^100.4",
+        "magento/module-quote": "^101.2",
+        "magento/module-quote-graph-ql": "^100.4",
+        "magento/module-sales": "^103.0",
+        "magento/module-sales-graph-ql": "^100.4",
+        "magento/module-customer": "^103.0",
         "tapbuy/redirect-tracking": "^1.4"
     },
     "autoload": {
