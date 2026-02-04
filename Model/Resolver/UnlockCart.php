@@ -152,11 +152,14 @@ class UnlockCart implements ResolverInterface
                 $paymentMethodInstance = $order->getPayment()->getMethodInstance();
                 $orderStatus = $paymentMethodInstance->getConfigData($configDataKey);
             } catch (\Exception $e) {
-                $this->logger->warning('Checkout-GraphQL: Failed to get order status from payment method, using canceled', [
-                    'order_id' => $order->getIncrementId(),
-                    'config_key' => $configDataKey,
-                    'error' => $e->getMessage(),
-                ]);
+                $this->logger->warning(
+                    'Checkout-GraphQL: Failed to get order status from payment method, using canceled',
+                    [
+                        'order_id' => $order->getIncrementId(),
+                        'config_key' => $configDataKey,
+                        'error' => $e->getMessage(),
+                    ]
+                );
                 $orderStatus = 'canceled';
             }
 
@@ -193,8 +196,9 @@ class UnlockCart implements ResolverInterface
     }
 
     /**
-     * Reactivate the cart
-     * With option to cancel associated orders
+     * Reactivate the cart.
+     *
+     * With option to cancel associated orders.
      *
      * @param string $cartId
      * @param bool $cancelOrders

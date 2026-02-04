@@ -70,7 +70,16 @@ class OrderAssignCustomer implements ResolverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Resolve order assignment to customer.
+     *
+     * @param Field $field
+     * @param ContextInterface $context
+     * @param ResolveInfo $info
+     * @param array|null $value
+     * @param array|null $args
+     * @return array
+     * @throws GraphQlInputException
+     * @throws GraphQlNoSuchEntityException
      */
     public function resolve(
         Field $field,
@@ -91,7 +100,9 @@ class OrderAssignCustomer implements ResolverInterface
 
         $orderIdentifier = (string)$args['order_id'];
         $customerId = (int)$args['customer_id'];
-        $identifierType = $this->resolveIdentifierType($args['order_identifier_type'] ?? OrderLocatorInterface::IDENTIFIER_TYPE_AUTO);
+        $identifierType = $this->resolveIdentifierType(
+            $args['order_identifier_type'] ?? OrderLocatorInterface::IDENTIFIER_TYPE_AUTO
+        );
 
         try {
             $order = $this->orderLocator->getByIdentifier($orderIdentifier, $identifierType);
@@ -189,5 +200,4 @@ class OrderAssignCustomer implements ResolverInterface
 
         return $normalizedType;
     }
-
 }

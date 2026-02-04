@@ -39,6 +39,15 @@ class SetPaymentMethodOnCartPlugin
      */
     private $requestDetector;
 
+    /**
+     * Constructor
+     *
+     * @param CartRepositoryInterface $cartRepository
+     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param SerializerInterface $serializer
+     * @param LoggerInterface $logger
+     * @param TapbuyRequestDetectorInterface $requestDetector
+     */
     public function __construct(
         CartRepositoryInterface $cartRepository,
         QuoteIdMaskFactory $quoteIdMaskFactory,
@@ -54,10 +63,12 @@ class SetPaymentMethodOnCartPlugin
     }
 
     /**
+     * After resolve plugin for SetPaymentMethodOnCart.
+     *
      * @param SetPaymentMethodOnCart $subject
      * @param mixed $result
      * @param Field $field
-     * @param $context
+     * @param ContextInterface $context
      * @param ResolveInfo $info
      * @param array|null $value
      * @param array|null $args

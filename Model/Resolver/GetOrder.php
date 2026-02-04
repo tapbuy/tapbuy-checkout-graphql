@@ -79,7 +79,9 @@ class GetOrder implements ResolverInterface
         }
 
         $orderNumber = $args['order_number'] ?? $args['order_id'];
-        $identifierType = isset($args['order_id']) ? OrderLocatorInterface::IDENTIFIER_TYPE_ENTITY_ID : OrderLocatorInterface::IDENTIFIER_TYPE_INCREMENT_ID;
+        $identifierType = isset($args['order_id'])
+            ? OrderLocatorInterface::IDENTIFIER_TYPE_ENTITY_ID
+            : OrderLocatorInterface::IDENTIFIER_TYPE_INCREMENT_ID;
 
         try {
             $order = $this->orderLocator->getByIdentifier($orderNumber, $identifierType);

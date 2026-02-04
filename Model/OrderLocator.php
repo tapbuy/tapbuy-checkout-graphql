@@ -20,6 +20,12 @@ class OrderLocator implements OrderLocatorInterface
      */
     private $searchCriteriaBuilderFactory;
 
+    /**
+     * Constructor
+     *
+     * @param OrderRepositoryInterface $orderRepository
+     * @param SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
+     */
     public function __construct(
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
@@ -36,8 +42,10 @@ class OrderLocator implements OrderLocatorInterface
      * @return OrderInterface
      * @throws NoSuchEntityException
      */
-    public function getByIdentifier(string $identifier, string $identifierType = self::IDENTIFIER_TYPE_AUTO): OrderInterface
-    {
+    public function getByIdentifier(
+        string $identifier,
+        string $identifierType = self::IDENTIFIER_TYPE_AUTO
+    ): OrderInterface {
         $normalizedIdentifier = trim($identifier);
         if ($normalizedIdentifier === '') {
             throw new NoSuchEntityException(__('Order identifier is empty.'));
@@ -55,7 +63,8 @@ class OrderLocator implements OrderLocatorInterface
         try {
             return $this->getByIncrementId($normalizedIdentifier, $identifier);
         } catch (NoSuchEntityException $exception) {
-            // fall back to entity ID if identifier looks numeric
+            // Intentionally empty - fall back to entity ID if increment ID lookup fails
+            // This allows numeric identifiers to work as either increment or entity IDs
         }
 
         return $this->getByEntityId($normalizedIdentifier, $identifier);

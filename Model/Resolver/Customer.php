@@ -80,5 +80,4 @@ class Customer implements ResolverInterface
     {
         return $customer->getId();
     }
-
 }

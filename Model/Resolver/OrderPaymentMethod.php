@@ -30,7 +30,6 @@ class OrderPaymentMethod implements ResolverInterface
         $this->tokenAuthorization = $tokenAuthorization;
     }
 
-
     /**
      * Resolves the GraphQL query for retrieving the order payment method.
      *
@@ -107,5 +106,4 @@ class OrderPaymentMethod implements ResolverInterface
     {
         return (float) $payment->getAmountOrdered() ?? null;
     }
-
 }

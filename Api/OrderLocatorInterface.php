@@ -31,5 +31,8 @@ interface OrderLocatorInterface
      * @return OrderInterface
      * @throws NoSuchEntityException
      */
-    public function getByIdentifier(string $identifier, string $identifierType = self::IDENTIFIER_TYPE_AUTO): OrderInterface;
+    public function getByIdentifier(
+        string $identifier,
+        string $identifierType = self::IDENTIFIER_TYPE_AUTO
+    ): OrderInterface;
 }

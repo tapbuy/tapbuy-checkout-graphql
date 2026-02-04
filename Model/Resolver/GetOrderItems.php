@@ -58,7 +58,8 @@ class GetOrderItems implements ResolverInterface
 
     /**
      * Resolves the GraphQL query for retrieving order items.
-     * This method checks if the token is authorized to view order items,
+     *
+     * This method checks if the token is authorized to view order items.
      *
      * @param Field $field The GraphQL field being resolved.
      * @param mixed $context The context of the GraphQL request.
