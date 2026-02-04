@@ -59,6 +59,11 @@
         </arguments>
     </type>
     <!-- Configure TapbuyLogger for Resolver classes with error handling -->
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\CustomerSearch">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\DeactivateCart">
         <arguments>
             <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>

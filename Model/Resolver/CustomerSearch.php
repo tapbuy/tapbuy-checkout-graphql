@@ -10,6 +10,7 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
 use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class CustomerSearch implements ResolverInterface
 {
@@ -34,18 +35,26 @@ class CustomerSearch implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var TapbuyLogger
+     */
+    private $logger;
+
+    /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorization $tokenAuthorization
+     * @param TapbuyLogger $logger
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         ExtractCustomerData $extractCustomerData,
-        TokenAuthorization $tokenAuthorization
+        TokenAuthorization $tokenAuthorization,
+        TapbuyLogger $logger
     ) {
         $this->customerRepository = $customerRepository;
         $this->extractCustomerData = $extractCustomerData;
         $this->tokenAuthorization = $tokenAuthorization;
+        $this->logger = $logger;
     }
 
     /**
