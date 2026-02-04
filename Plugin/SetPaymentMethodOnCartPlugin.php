@@ -10,6 +10,7 @@ use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Framework\Serialize\SerializerInterface;
 use Tapbuy\RedirectTracking\Api\LoggerInterface;
 use Tapbuy\RedirectTracking\Api\TapbuyConstants;
+use Tapbuy\RedirectTracking\Api\TapbuyRequestDetectorInterface;
 
 class SetPaymentMethodOnCartPlugin
 {
@@ -33,16 +34,23 @@ class SetPaymentMethodOnCartPlugin
      */
     private $logger;
 
+    /**
+     * @var TapbuyRequestDetectorInterface
+     */
+    private $requestDetector;
+
     public function __construct(
         CartRepositoryInterface $cartRepository,
         QuoteIdMaskFactory $quoteIdMaskFactory,
         SerializerInterface $serializer,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        TapbuyRequestDetectorInterface $requestDetector
     ) {
         $this->cartRepository = $cartRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
         $this->serializer = $serializer;
         $this->logger = $logger;
+        $this->requestDetector = $requestDetector;
     }
 
     /**
@@ -64,6 +72,11 @@ class SetPaymentMethodOnCartPlugin
         array $value = null,
         array $args = null
     ) {
+        // Early return for non-Tapbuy requests to avoid unnecessary processing
+        if (!$this->requestDetector->isTapbuyCall()) {
+            return $result;
+        }
+
         try {
             $cartId = $args['input']['cart_id'] ?? null;
             $paymentMethod = $args['input']['payment_method'] ?? null;
