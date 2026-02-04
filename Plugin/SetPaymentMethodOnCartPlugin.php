@@ -8,6 +8,7 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Framework\Serialize\SerializerInterface;
+use Tapbuy\RedirectTracking\Api\TapbuyConstants;
 use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class SetPaymentMethodOnCartPlugin
@@ -97,7 +98,7 @@ class SetPaymentMethodOnCartPlugin
         $payment = $quote->getPayment();
 
         $payment->setAdditionalInformation(
-            'tapbuy',
+            TapbuyConstants::PAYMENT_ADDITIONAL_INFO_KEY,
             $this->serializer->serialize($additionalInfo)
         );
         $this->cartRepository->save($quote);
