@@ -6,13 +6,10 @@ use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface;
 
-class OrderLocator
+class OrderLocator implements OrderLocatorInterface
 {
-    public const IDENTIFIER_TYPE_AUTO = 'auto';
-    public const IDENTIFIER_TYPE_ENTITY_ID = 'entity_id';
-    public const IDENTIFIER_TYPE_INCREMENT_ID = 'increment_id';
-
     /**
      * @var OrderRepositoryInterface
      */

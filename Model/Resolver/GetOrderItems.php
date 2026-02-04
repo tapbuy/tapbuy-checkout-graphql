@@ -14,7 +14,7 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\SalesGraphQl\Model\OrderItem\DataProvider as OrderItemProvider;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 
 /**
  * Resolve order items for order.
@@ -24,10 +24,10 @@ class GetOrderItems implements ResolverInterface
     /**
      * Required ACL resource for viewing order items
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -42,12 +42,12 @@ class GetOrderItems implements ResolverInterface
     private $orderItemProvider;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ValueFactory $valueFactory
      * @param OrderItemProvider $orderItemProvider
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         ValueFactory $valueFactory,
         OrderItemProvider $orderItemProvider
     ) {

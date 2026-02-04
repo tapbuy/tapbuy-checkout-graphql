@@ -4,8 +4,9 @@ namespace Tapbuy\CheckoutGraphql\Model;
 
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\SalesGraphQl\Model\Formatter\Order as OrderFormatter;
+use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
 
-class OrderDataFormatter
+class OrderDataFormatter implements OrderDataFormatterInterface
 {
     /**
      * @var OrderFormatter

@@ -9,15 +9,15 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class CustomerSearch implements ResolverInterface
 {
     /**
      * Required ACL resource for searching customers
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CUSTOMER_SEARCH;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CUSTOMER_SEARCH;
 
     /**
      * @var CustomerRepositoryInterface
@@ -30,26 +30,26 @@ class CustomerSearch implements ResolverInterface
     private $extractCustomerData;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
-     * @param TokenAuthorization $tokenAuthorization
-     * @param TapbuyLogger $logger
+     * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param LoggerInterface $logger
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         ExtractCustomerData $extractCustomerData,
-        TokenAuthorization $tokenAuthorization,
-        TapbuyLogger $logger
+        TokenAuthorizationInterface $tokenAuthorization,
+        LoggerInterface $logger
     ) {
         $this->customerRepository = $customerRepository;
         $this->extractCustomerData = $extractCustomerData;
