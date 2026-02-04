@@ -11,10 +11,16 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Module\Manager as ModuleManager;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class ModulesVersions implements ResolverInterface
 {
+    /**
+     * Required ACL resource for viewing module versions
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_MODULES_VERSIONS;
+
     /**
      * @var TokenAuthorization
      */
@@ -41,6 +47,11 @@ class ModulesVersions implements ResolverInterface
     private $moduleManager;
 
     /**
+     * @var TapbuyLogger
+     */
+    private $logger;
+
+    /**
      * @param TokenAuthorization $tokenAuthorization
      * @param ComponentRegistrar $componentRegistrar
      * @param File $file
@@ -52,13 +63,15 @@ class ModulesVersions implements ResolverInterface
         ComponentRegistrar $componentRegistrar,
         File $file,
         Json $json,
-        ModuleManager $moduleManager
+        ModuleManager $moduleManager,
+        TapbuyLogger $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->componentRegistrar = $componentRegistrar;
         $this->file = $file;
         $this->json = $json;
         $this->moduleManager = $moduleManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -82,7 +95,7 @@ class ModulesVersions implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ): array {
-        $this->tokenAuthorization->authorize('Magento_Backend::admin');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         $tapbuyModules = [];
         $allModules = $this->componentRegistrar->getPaths(ComponentRegistrar::MODULE);
@@ -111,8 +124,13 @@ class ModulesVersions implements ResolverInterface
                             'enabled' => $isEnabled
                         ];
                     }
-                } catch (FileSystemException $e) {
-                    // If we can't read the file, add module with unknown version
+                } catch (\Exception $e) {
+                    // Log the error and add module with unknown version
+                    $this->logger->logException(
+                        'Failed to read composer.json for module',
+                        $e,
+                        ['module' => $moduleName, 'path' => $composerJsonPath]
+                    );
                     $tapbuyModules[] = [
                         'name' => $moduleName,
                         'version' => 'Unknown',

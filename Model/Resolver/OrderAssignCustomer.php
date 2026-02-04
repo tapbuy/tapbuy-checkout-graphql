@@ -12,12 +12,17 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Model\Order\CustomerAssignment;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
 use Tapbuy\CheckoutGraphql\Model\OrderLocator;
 
 class OrderAssignCustomer implements ResolverInterface
 {
+    /**
+     * Required ACL resource for assigning orders to customers
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_ASSIGN;
+
     /**
      * @var TokenAuthorization
      */
@@ -74,7 +79,7 @@ class OrderAssignCustomer implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_edit');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['order_id'])) {
             throw new GraphQlInputException(__('Order ID is required'));

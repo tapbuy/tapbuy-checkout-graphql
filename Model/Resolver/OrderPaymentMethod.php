@@ -6,11 +6,16 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 use Magento\Sales\Model\Order\Payment;
 
 class OrderPaymentMethod implements ResolverInterface
 {
+    /**
+     * Required ACL resource for viewing order payment methods
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+
     /**
      * @var TokenAuthorization
      */
@@ -44,7 +49,7 @@ class OrderPaymentMethod implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!isset($value['model'])) {
             return null;

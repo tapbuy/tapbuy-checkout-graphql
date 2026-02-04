@@ -9,10 +9,16 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class CustomerSearch implements ResolverInterface
 {
+    /**
+     * Required ACL resource for searching customers
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CUSTOMER_SEARCH;
+
     /**
      * @var CustomerRepositoryInterface
      */
@@ -29,18 +35,26 @@ class CustomerSearch implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var TapbuyLogger
+     */
+    private $logger;
+
+    /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorization $tokenAuthorization
+     * @param TapbuyLogger $logger
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         ExtractCustomerData $extractCustomerData,
-        TokenAuthorization $tokenAuthorization
+        TokenAuthorization $tokenAuthorization,
+        TapbuyLogger $logger
     ) {
         $this->customerRepository = $customerRepository;
         $this->extractCustomerData = $extractCustomerData;
         $this->tokenAuthorization = $tokenAuthorization;
+        $this->logger = $logger;
     }
 
     /**
@@ -65,7 +79,7 @@ class CustomerSearch implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
-        $this->tokenAuthorization->authorize('Magento_Customer::customer');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['email'])) {
             throw new GraphQlInputException(__('Email is required'));

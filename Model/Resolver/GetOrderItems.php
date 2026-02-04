@@ -14,13 +14,18 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\SalesGraphQl\Model\OrderItem\DataProvider as OrderItemProvider;
-use Tapbuy\CheckoutGraphql\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
 
 /**
  * Resolve order items for order.
  */
 class GetOrderItems implements ResolverInterface
 {
+    /**
+     * Required ACL resource for viewing order items
+     */
+    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+
     /**
      * @var TokenAuthorization
      */
@@ -64,7 +69,7 @@ class GetOrderItems implements ResolverInterface
      */
     public function resolve(Field $field, $context, ResolveInfo $info, array $value = null, array $args = null)
     {
-        $this->tokenAuthorization->authorize('Magento_Sales::actions_view');
+        $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!(($value['model'] ?? null) instanceof OrderInterface)) {
             throw new LocalizedException(__('"model" value should be specified'));

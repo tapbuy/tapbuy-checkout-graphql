@@ -8,7 +8,7 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Framework\Serialize\SerializerInterface;
-use Psr\Log\LoggerInterface;
+use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class SetPaymentMethodOnCartPlugin
 {
@@ -28,7 +28,7 @@ class SetPaymentMethodOnCartPlugin
     private $serializer;
 
     /**
-     * @var LoggerInterface
+     * @var TapbuyLogger
      */
     private $logger;
 
@@ -36,7 +36,7 @@ class SetPaymentMethodOnCartPlugin
         CartRepositoryInterface $cartRepository,
         QuoteIdMaskFactory $quoteIdMaskFactory,
         SerializerInterface $serializer,
-        LoggerInterface $logger
+        TapbuyLogger $logger
     ) {
         $this->cartRepository = $cartRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
@@ -70,9 +70,14 @@ class SetPaymentMethodOnCartPlugin
 
             if ($cartId && $tapbuyAdditionalInfo) {
                 $this->setTapbuyAdditionalInformation($cartId, $tapbuyAdditionalInfo);
+
+                $this->logger->debug('Checkout-GraphQL: Set Tapbuy additional information on cart', [
+                    'cart_id' => $cartId,
+                    'additional_info_keys' => array_keys($tapbuyAdditionalInfo),
+                ]);
             }
         } catch (\Exception $e) {
-            $this->logger->error('Error setting Tapbuy additional information: ' . $e->getMessage());
+            $this->logger->logException('Error setting Tapbuy additional information', $e);
         }
 
         return $result;

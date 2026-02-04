@@ -2,5 +2,15 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Tapbuy_CheckoutGraphql">
+        <sequence>
+            <module name="Magento_Framework"/>
+            <module name="Magento_GraphQl"/>
+            <module name="Magento_Quote"/>
+            <module name="Magento_QuoteGraphQl"/>
+            <module name="Magento_Sales"/>
+            <module name="Magento_SalesGraphQl"/>
+            <module name="Magento_Customer"/>
+            <module name="Tapbuy_RedirectTracking"/>
+        </sequence>
     </module>
 </config>
