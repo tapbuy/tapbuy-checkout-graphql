@@ -11,18 +11,18 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Module\Manager as ModuleManager;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class ModulesVersions implements ResolverInterface
 {
     /**
      * Required ACL resource for viewing module versions
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_MODULES_VERSIONS;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_MODULES_VERSIONS;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -47,24 +47,25 @@ class ModulesVersions implements ResolverInterface
     private $moduleManager;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ComponentRegistrar $componentRegistrar
      * @param File $file
      * @param Json $json
      * @param ModuleManager $moduleManager
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         ComponentRegistrar $componentRegistrar,
         File $file,
         Json $json,
         ModuleManager $moduleManager,
-        TapbuyLogger $logger
+        LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->componentRegistrar = $componentRegistrar;

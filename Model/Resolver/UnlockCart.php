@@ -11,19 +11,19 @@ use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\Order;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Helper\CartHelper;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
+use Tapbuy\CheckoutGraphql\Api\CartHelperInterface;
 
 class UnlockCart implements ResolverInterface
 {
     /**
      * Required ACL resource for unlocking carts
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_UNLOCK;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_UNLOCK;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -43,30 +43,30 @@ class UnlockCart implements ResolverInterface
     private $quoteFactory;
 
     /**
-     * @var CartHelper
+     * @var CartHelperInterface
      */
     private $cartHelper;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
-     * @param CartHelper $cartHelper
-     * @param TapbuyLogger $logger
+     * @param CartHelperInterface $cartHelper
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
-        CartHelper $cartHelper,
-        TapbuyLogger $logger
+        CartHelperInterface $cartHelper,
+        LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderCollectionFactory = $orderCollectionFactory;

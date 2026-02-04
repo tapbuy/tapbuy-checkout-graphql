@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- di.xml -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Preferences -->
+    <preference for="Tapbuy\CheckoutGraphql\Api\CartHelperInterface"
+                type="Tapbuy\CheckoutGraphql\Helper\CartHelper"/>
+
+    <preference for="Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface"
+                type="Tapbuy\CheckoutGraphql\Model\OrderDataFormatter"/>
+
+    <preference for="Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface"
+                type="Tapbuy\CheckoutGraphql\Model\OrderLocator"/>
+
+    <!-- Inject centralized Tapbuy Logger where needed -->
+    <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\UnlockCart">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\DeactivateCart">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\CustomerSearch">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\ModulesVersions">
+        <arguments>
+            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Logger\TapbuyLogger</argument>
+        </arguments>
+    </type>
+
+</config>

@@ -3,8 +3,9 @@
 namespace Tapbuy\CheckoutGraphql\Helper;
 
 use Magento\Quote\Model\QuoteIdMaskFactory;
+use Tapbuy\CheckoutGraphql\Api\CartHelperInterface;
 
-class CartHelper
+class CartHelper implements CartHelperInterface
 {
     /**
      * @var QuoteIdMaskFactory

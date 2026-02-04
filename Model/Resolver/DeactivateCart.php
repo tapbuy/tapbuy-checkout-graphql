@@ -9,19 +9,19 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteFactory;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Helper\CartHelper;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
+use Tapbuy\CheckoutGraphql\Api\CartHelperInterface;
 
 class DeactivateCart implements ResolverInterface
 {
     /**
      * Required ACL resource for deactivating carts
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_DEACTIVATE;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_DEACTIVATE;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -36,28 +36,28 @@ class DeactivateCart implements ResolverInterface
     private $quoteFactory;
 
     /**
-     * @var CartHelper
+     * @var CartHelperInterface
      */
     private $cartHelper;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
      * @param QuoteFactory $quoteFactory
-     * @param CartHelper $cartHelper
-     * @param TapbuyLogger $logger
+     * @param CartHelperInterface $cartHelper
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         CartRepositoryInterface $cartRepository,
         QuoteFactory $quoteFactory,
-        CartHelper $cartHelper,
-        TapbuyLogger $logger
+        CartHelperInterface $cartHelper,
+        LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->cartRepository = $cartRepository;

@@ -8,8 +8,8 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Framework\Serialize\SerializerInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
 use Tapbuy\RedirectTracking\Api\TapbuyConstants;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
 
 class SetPaymentMethodOnCartPlugin
 {
@@ -29,7 +29,7 @@ class SetPaymentMethodOnCartPlugin
     private $serializer;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
@@ -37,7 +37,7 @@ class SetPaymentMethodOnCartPlugin
         CartRepositoryInterface $cartRepository,
         QuoteIdMaskFactory $quoteIdMaskFactory,
         SerializerInterface $serializer,
-        TapbuyLogger $logger
+        LoggerInterface $logger
     ) {
         $this->cartRepository = $cartRepository;
         $this->quoteIdMaskFactory = $quoteIdMaskFactory;
