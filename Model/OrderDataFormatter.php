@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model;
 
 use Magento\Sales\Api\Data\OrderInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Copied directly from the Magento resolver.
  * The only change is that the authorized customer check is removed.
