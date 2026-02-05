@@ -31,6 +31,24 @@ class OrderDataFormatter implements OrderDataFormatterInterface
     {
         $orderData = $this->orderFormatter->format($order);
 
+        $orderData = $this->formatShippingAddress($orderData, $order);
+        $orderData = $this->formatBillingAddress($orderData, $order);
+        $orderData = $this->formatPaymentMethods($orderData, $order);
+        $orderData['tapbuy_shipping_assignments'] = $this->formatShippingAssignments($order);
+        $orderData = $this->formatTapbuyMetadata($orderData, $order);
+
+        return $orderData;
+    }
+
+    /**
+     * Format shipping address data with model attachment.
+     *
+     * @param array $orderData
+     * @param OrderInterface $order
+     * @return array
+     */
+    private function formatShippingAddress(array $orderData, OrderInterface $order): array
+    {
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress) {
             if (!isset($orderData['shipping_address']) || !is_array($orderData['shipping_address'])) {
@@ -39,6 +57,18 @@ class OrderDataFormatter implements OrderDataFormatterInterface
             $orderData['shipping_address']['model'] = $shippingAddress;
         }
 
+        return $orderData;
+    }
+
+    /**
+     * Format billing address data with model attachment.
+     *
+     * @param array $orderData
+     * @param OrderInterface $order
+     * @return array
+     */
+    private function formatBillingAddress(array $orderData, OrderInterface $order): array
+    {
         $billingAddress = $order->getBillingAddress();
         if ($billingAddress) {
             if (!isset($orderData['billing_address']) || !is_array($orderData['billing_address'])) {
@@ -47,6 +77,18 @@ class OrderDataFormatter implements OrderDataFormatterInterface
             $orderData['billing_address']['model'] = $billingAddress;
         }
 
+        return $orderData;
+    }
+
+    /**
+     * Format payment methods data with model attachment.
+     *
+     * @param array $orderData
+     * @param OrderInterface $order
+     * @return array
+     */
+    private function formatPaymentMethods(array $orderData, OrderInterface $order): array
+    {
         $payment = $order->getPayment();
         if ($payment) {
             if (!isset($orderData['payment_methods']) || !is_array($orderData['payment_methods'])) {
@@ -60,29 +102,27 @@ class OrderDataFormatter implements OrderDataFormatterInterface
             $orderData['payment_methods'][0]['model'] = $payment;
         }
 
+        return $orderData;
+    }
+
+    /**
+     * Format shipping assignments from order extension attributes.
+     *
+     * @param OrderInterface $order
+     * @return array
+     */
+    private function formatShippingAssignments(OrderInterface $order): array
+    {
+        $shippingAssignments = [];
         $extensionAttributes = $order->getExtensionAttributes();
+
         if ($extensionAttributes && $extensionAttributes->getShippingAssignments()) {
-            $orderData['tapbuy_shipping_assignments'] = [];
             foreach ($extensionAttributes->getShippingAssignments() as $shippingAssignment) {
-                $items = [];
-                foreach ($shippingAssignment->getItems() as $item) {
-                    $items[] = [
-                        'item_id' => $item->getItemId(),
-                        'product_id' => $item->getProductId(),
-                    ];
-                }
-
+                $items = $this->extractShippingItems($shippingAssignment);
                 $shipping = $shippingAssignment->getShipping();
-                $address = null;
-                if ($shipping && $shipping->getAddress()) {
-                    $address = $shipping->getAddress()->getData();
-                    if (is_array($address)) {
-                        $address['street'] = $shipping->getAddress()->getStreet();
-                        $address['country_code'] = $shipping->getAddress()->getCountryId();
-                    }
-                }
+                $address = $this->extractShippingAddress($shipping);
 
-                $orderData['tapbuy_shipping_assignments'][] = [
+                $shippingAssignments[] = [
                     'method' => $shipping ? $shipping->getMethod() : null,
                     'address' => $address,
                     'items' => $items,
@@ -90,6 +130,58 @@ class OrderDataFormatter implements OrderDataFormatterInterface
             }
         }
 
+        return $shippingAssignments;
+    }
+
+    /**
+     * Extract shipping items from a shipping assignment.
+     *
+     * @param \Magento\Sales\Api\Data\ShippingAssignmentInterface $assignment
+     * @return array
+     */
+    private function extractShippingItems($assignment): array
+    {
+        $items = [];
+        foreach ($assignment->getItems() as $item) {
+            $items[] = [
+                'item_id' => $item->getItemId(),
+                'product_id' => $item->getProductId(),
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Extract and format shipping address from shipping object.
+     *
+     * @param \Magento\Sales\Api\Data\ShippingInterface|null $shipping
+     * @return array|null
+     */
+    private function extractShippingAddress($shipping): ?array
+    {
+        if (!$shipping || !$shipping->getAddress()) {
+            return null;
+        }
+
+        $address = $shipping->getAddress()->getData();
+        if (is_array($address)) {
+            $address['street'] = $shipping->getAddress()->getStreet();
+            $address['country_code'] = $shipping->getAddress()->getCountryId();
+        }
+
+        return is_array($address) ? $address : null;
+    }
+
+    /**
+     * Add Tapbuy-specific metadata to order data.
+     *
+     * @param array $orderData
+     * @param OrderInterface $order
+     * @return array
+     */
+    private function formatTapbuyMetadata(array $orderData, OrderInterface $order): array
+    {
         $orderData['tapbuy_state'] = $order->getState();
         $orderData['model'] = $order;
 
