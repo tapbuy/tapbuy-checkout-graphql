@@ -165,12 +165,14 @@ class OrderDataFormatter implements OrderDataFormatterInterface
         }
 
         $address = $shipping->getAddress()->getData();
-        if (is_array($address)) {
-            $address['street'] = $shipping->getAddress()->getStreet();
-            $address['country_code'] = $shipping->getAddress()->getCountryId();
+        if (!is_array($address)) {
+            return null;
         }
 
-        return is_array($address) ? $address : null;
+        $address['street'] = $shipping->getAddress()->getStreet();
+        $address['country_code'] = $shipping->getAddress()->getCountryId();
+
+        return $address;
     }
 
     /**
