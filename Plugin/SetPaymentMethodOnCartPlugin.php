@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Plugin;
 
 use Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart;

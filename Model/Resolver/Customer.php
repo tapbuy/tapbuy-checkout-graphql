@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
