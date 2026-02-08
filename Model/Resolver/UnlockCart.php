@@ -100,7 +100,7 @@ class UnlockCart implements ResolverInterface
 
         $cancelOrders = true;
 
-        if (!$unlockReason === 'update_payment_details') {
+        if ($unlockReason !== 'update_payment_details') {
             // Update order status if order exists
             $this->updateOrderStatus((string) $cartId, $unlockReason);
             $cancelOrders = false;
