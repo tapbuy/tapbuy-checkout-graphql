@@ -12,7 +12,7 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
-use Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface;
+use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 
 class GetOrder implements ResolverInterface

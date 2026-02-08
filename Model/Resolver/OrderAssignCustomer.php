@@ -16,7 +16,7 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Model\Order\CustomerAssignment;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
-use Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface;
+use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 
 class OrderAssignCustomer implements ResolverInterface
 {

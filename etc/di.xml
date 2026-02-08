@@ -4,14 +4,8 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
     <!-- Preferences -->
-    <preference for="Tapbuy\CheckoutGraphql\Api\CartHelperInterface"
-                type="Tapbuy\CheckoutGraphql\Helper\CartHelper"/>
-
     <preference for="Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface"
                 type="Tapbuy\CheckoutGraphql\Model\OrderDataFormatter"/>
-
-    <preference for="Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface"
-                type="Tapbuy\CheckoutGraphql\Model\OrderLocator"/>
 
     <!-- Inject centralized Tapbuy Logger via interface (resolved via preference in redirect-tracking) -->
     <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
