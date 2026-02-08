@@ -10,10 +10,9 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\QuoteFactory;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
 use Tapbuy\RedirectTracking\Api\LoggerInterface;
-use Tapbuy\CheckoutGraphql\Api\CartHelperInterface;
 
 class DeactivateCart implements ResolverInterface
 {
@@ -33,14 +32,9 @@ class DeactivateCart implements ResolverInterface
     private $cartRepository;
 
     /**
-     * @var QuoteFactory
+     * @var CartResolverInterface
      */
-    private $quoteFactory;
-
-    /**
-     * @var CartHelperInterface
-     */
-    private $cartHelper;
+    private $cartResolver;
 
     /**
      * @var LoggerInterface
@@ -50,21 +44,18 @@ class DeactivateCart implements ResolverInterface
     /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
-     * @param QuoteFactory $quoteFactory
-     * @param CartHelperInterface $cartHelper
+     * @param CartResolverInterface $cartResolver
      * @param LoggerInterface $logger
      */
     public function __construct(
         TokenAuthorizationInterface $tokenAuthorization,
         CartRepositoryInterface $cartRepository,
-        QuoteFactory $quoteFactory,
-        CartHelperInterface $cartHelper,
+        CartResolverInterface $cartResolver,
         LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->cartRepository = $cartRepository;
-        $this->quoteFactory = $quoteFactory;
-        $this->cartHelper = $cartHelper;
+        $this->cartResolver = $cartResolver;
         $this->logger = $logger;
     }
 
@@ -94,11 +85,8 @@ class DeactivateCart implements ResolverInterface
 
         $cartId = $args['cart_id'];
 
-        // Handle masked cart ID conversion first
-        $realCartId = $this->cartHelper->getRealCartId($cartId);
-
-        // Deactivate the cart
-        $cart = $this->deactivateCart($realCartId);
+        // Deactivate the cart (handles masked ID conversion internally)
+        $cart = $this->deactivateCart($cartId);
 
         return [
             'cart' => $cart
@@ -108,13 +96,13 @@ class DeactivateCart implements ResolverInterface
     /**
      * Deactivate the cart
      *
-     * @param string $cartId
+     * @param string $cartId The cart ID (masked or numeric)
      * @return array
      */
     private function deactivateCart(string $cartId): array
     {
         try {
-            $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
+            $quote = $this->cartResolver->resolveAndLoadQuote($cartId);
         } catch (\Exception $e) {
             $this->logger->logException('Error loading cart for deactivation', $e, [
                 'cart_id' => $cartId,
@@ -127,7 +115,7 @@ class DeactivateCart implements ResolverInterface
         }
 
         if ($quote->getId()) {
-            $quote->setIsActive(0);
+            $quote->setIsActive(false);
             $this->cartRepository->save($quote);
 
             $this->logger->debug('Checkout-GraphQL: Deactivated cart', [

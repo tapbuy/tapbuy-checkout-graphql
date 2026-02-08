@@ -4,9 +4,6 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
     <!-- Preferences -->
-    <preference for="Tapbuy\CheckoutGraphql\Api\CartHelperInterface"
-                type="Tapbuy\CheckoutGraphql\Helper\CartHelper"/>
-
     <preference for="Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface"
                 type="Tapbuy\CheckoutGraphql\Model\OrderDataFormatter"/>
 
