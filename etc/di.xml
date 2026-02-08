@@ -7,9 +7,6 @@
     <preference for="Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface"
                 type="Tapbuy\CheckoutGraphql\Model\OrderDataFormatter"/>
 
-    <preference for="Tapbuy\CheckoutGraphql\Api\OrderLocatorInterface"
-                type="Tapbuy\CheckoutGraphql\Model\OrderLocator"/>
-
     <!-- Inject centralized Tapbuy Logger via interface (resolved via preference in redirect-tracking) -->
     <type name="Tapbuy\CheckoutGraphql\Plugin\SetPaymentMethodOnCartPlugin">
         <arguments>
