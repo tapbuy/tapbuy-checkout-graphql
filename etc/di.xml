@@ -26,12 +26,6 @@
         </arguments>
     </type>
 
-    <type name="Tapbuy\CheckoutGraphql\Model\Resolver\CustomerSearch">
-        <arguments>
-            <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Api\LoggerInterface</argument>
-        </arguments>
-    </type>
-
     <type name="Tapbuy\CheckoutGraphql\Model\Resolver\ModulesVersions">
         <arguments>
             <argument name="logger" xsi:type="object">Tapbuy\RedirectTracking\Api\LoggerInterface</argument>

@@ -10,9 +10,9 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
-use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class CustomerSearch implements ResolverInterface
 {
@@ -37,26 +37,18 @@ class CustomerSearch implements ResolverInterface
     private $tokenAuthorization;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorizationInterface $tokenAuthorization
-     * @param LoggerInterface $logger
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         ExtractCustomerData $extractCustomerData,
         TokenAuthorizationInterface $tokenAuthorization,
-        LoggerInterface $logger
     ) {
         $this->customerRepository = $customerRepository;
         $this->extractCustomerData = $extractCustomerData;
         $this->tokenAuthorization = $tokenAuthorization;
-        $this->logger = $logger;
     }
 
     /**
@@ -93,7 +85,7 @@ class CustomerSearch implements ResolverInterface
             $customer = $this->customerRepository->get($email);
             return $this->extractCustomerData->execute($customer);
 
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+        } catch (NoSuchEntityException $e) {
             return null;
         }
     }
