@@ -2,20 +2,20 @@
     "name": "tapbuy/checkout-graphql",
     "description": "Tapbuy checkout module for Magento 2 GraphQL",
     "type": "magento2-module",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "license": [
         "OSL-3.0"
     ],
     "require": {
         "php": "^7.4 || ^8.1",
         "magento/framework": "^103.0",
-        "magento/module-graphql": "^100.4",
+        "magento/module-graph-ql": "^100.4",
         "magento/module-quote": "^101.2",
         "magento/module-quote-graph-ql": "^100.4",
         "magento/module-sales": "^103.0",
         "magento/module-sales-graph-ql": "^100.4",
         "magento/module-customer": "^103.0",
-        "tapbuy/redirect-tracking": "^1.6"
+        "tapbuy/redirect-tracking": "^1.6.1"
     },
     "autoload": {
         "files": [
