@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\GraphQl\Query\ResolverInterface;
@@ -8,20 +10,19 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\QuoteFactory;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Helper\CartHelper;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class DeactivateCart implements ResolverInterface
 {
     /**
      * Required ACL resource for deactivating carts
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_DEACTIVATE;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_DEACTIVATE;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -31,38 +32,30 @@ class DeactivateCart implements ResolverInterface
     private $cartRepository;
 
     /**
-     * @var QuoteFactory
+     * @var CartResolverInterface
      */
-    private $quoteFactory;
+    private $cartResolver;
 
     /**
-     * @var CartHelper
-     */
-    private $cartHelper;
-
-    /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
-     * @param QuoteFactory $quoteFactory
-     * @param CartHelper $cartHelper
-     * @param TapbuyLogger $logger
+     * @param CartResolverInterface $cartResolver
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         CartRepositoryInterface $cartRepository,
-        QuoteFactory $quoteFactory,
-        CartHelper $cartHelper,
-        TapbuyLogger $logger
+        CartResolverInterface $cartResolver,
+        LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->cartRepository = $cartRepository;
-        $this->quoteFactory = $quoteFactory;
-        $this->cartHelper = $cartHelper;
+        $this->cartResolver = $cartResolver;
         $this->logger = $logger;
     }
 
@@ -92,11 +85,8 @@ class DeactivateCart implements ResolverInterface
 
         $cartId = $args['cart_id'];
 
-        // Handle masked cart ID conversion first
-        $realCartId = $this->cartHelper->getRealCartId($cartId);
-
-        // Deactivate the cart
-        $cart = $this->deactivateCart($realCartId);
+        // Deactivate the cart (handles masked ID conversion internally)
+        $cart = $this->deactivateCart($cartId);
 
         return [
             'cart' => $cart
@@ -106,13 +96,13 @@ class DeactivateCart implements ResolverInterface
     /**
      * Deactivate the cart
      *
-     * @param string $cartId
+     * @param string $cartId The cart ID (masked or numeric)
      * @return array
      */
     private function deactivateCart(string $cartId): array
     {
         try {
-            $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
+            $quote = $this->cartResolver->resolveAndLoadQuote($cartId);
         } catch (\Exception $e) {
             $this->logger->logException('Error loading cart for deactivation', $e, [
                 'cart_id' => $cartId,
@@ -125,7 +115,7 @@ class DeactivateCart implements ResolverInterface
         }
 
         if ($quote->getId()) {
-            $quote->setIsActive(0);
+            $quote->setIsActive(false);
             $this->cartRepository->save($quote);
 
             $this->logger->debug('Checkout-GraphQL: Deactivated cart', [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -12,24 +14,24 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Model\Order\CustomerAssignment;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
-use Tapbuy\CheckoutGraphql\Model\OrderLocator;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
+use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 
 class OrderAssignCustomer implements ResolverInterface
 {
     /**
      * Required ACL resource for assigning orders to customers
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_ASSIGN;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_ASSIGN;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
     /**
-     * @var OrderDataFormatter
+     * @var OrderDataFormatterInterface
      */
     private $orderFormatter;
 
@@ -44,23 +46,23 @@ class OrderAssignCustomer implements ResolverInterface
     private $customerAssignment;
 
     /**
-     * @var OrderLocator
+     * @var OrderLocatorInterface
      */
     private $orderLocator;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
-     * @param OrderDataFormatter $orderFormatter
+     * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param OrderDataFormatterInterface $orderFormatter
      * @param CustomerRepositoryInterface $customerRepository
      * @param CustomerAssignment $customerAssignment
-     * @param OrderLocator $orderLocator
+     * @param OrderLocatorInterface $orderLocator
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
-        OrderDataFormatter $orderFormatter,
+        TokenAuthorizationInterface $tokenAuthorization,
+        OrderDataFormatterInterface $orderFormatter,
         CustomerRepositoryInterface $customerRepository,
         CustomerAssignment $customerAssignment,
-        OrderLocator $orderLocator
+        OrderLocatorInterface $orderLocator
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderFormatter = $orderFormatter;
@@ -70,7 +72,16 @@ class OrderAssignCustomer implements ResolverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Resolve order assignment to customer.
+     *
+     * @param Field $field
+     * @param ContextInterface $context
+     * @param ResolveInfo $info
+     * @param array|null $value
+     * @param array|null $args
+     * @return array
+     * @throws GraphQlInputException
+     * @throws GraphQlNoSuchEntityException
      */
     public function resolve(
         Field $field,
@@ -91,7 +102,9 @@ class OrderAssignCustomer implements ResolverInterface
 
         $orderIdentifier = (string)$args['order_id'];
         $customerId = (int)$args['customer_id'];
-        $identifierType = $this->resolveIdentifierType($args['order_identifier_type'] ?? OrderLocator::IDENTIFIER_TYPE_AUTO);
+        $identifierType = $this->resolveIdentifierType(
+            $args['order_identifier_type'] ?? OrderLocatorInterface::IDENTIFIER_TYPE_AUTO
+        );
 
         try {
             $order = $this->orderLocator->getByIdentifier($orderIdentifier, $identifierType);
@@ -168,14 +181,14 @@ class OrderAssignCustomer implements ResolverInterface
     private function resolveIdentifierType(?string $identifierType): string
     {
         if ($identifierType === null) {
-            return OrderLocator::IDENTIFIER_TYPE_AUTO;
+            return OrderLocatorInterface::IDENTIFIER_TYPE_AUTO;
         }
 
         $normalizedType = strtolower(trim($identifierType));
         $allowedTypes = [
-            OrderLocator::IDENTIFIER_TYPE_AUTO,
-            OrderLocator::IDENTIFIER_TYPE_ENTITY_ID,
-            OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID,
+            OrderLocatorInterface::IDENTIFIER_TYPE_AUTO,
+            OrderLocatorInterface::IDENTIFIER_TYPE_ENTITY_ID,
+            OrderLocatorInterface::IDENTIFIER_TYPE_INCREMENT_ID,
         ];
 
         if (!in_array($normalizedType, $allowedTypes, true)) {
@@ -189,5 +202,4 @@ class OrderAssignCustomer implements ResolverInterface
 
         return $normalizedType;
     }
-
 }

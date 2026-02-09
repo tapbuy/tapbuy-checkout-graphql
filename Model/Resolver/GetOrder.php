@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
@@ -8,9 +10,9 @@ use Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Model\OrderDataFormatter;
-use Tapbuy\CheckoutGraphql\Model\OrderLocator;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
+use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 
 class GetOrder implements ResolverInterface
@@ -18,32 +20,32 @@ class GetOrder implements ResolverInterface
     /**
      * Required ACL resource for viewing orders
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
     /**
-     * @var OrderDataFormatter
+     * @var OrderDataFormatterInterface
      */
     private $orderFormatter;
 
     /**
-     * @var OrderLocator
+     * @var OrderLocatorInterface
      */
     private $orderLocator;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
-     * @param OrderDataFormatter $orderFormatter
-     * @param OrderLocator $orderLocator
+     * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param OrderDataFormatterInterface $orderFormatter
+     * @param OrderLocatorInterface $orderLocator
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
-        OrderDataFormatter $orderFormatter,
-        OrderLocator $orderLocator
+        TokenAuthorizationInterface $tokenAuthorization,
+        OrderDataFormatterInterface $orderFormatter,
+        OrderLocatorInterface $orderLocator
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderFormatter = $orderFormatter;
@@ -79,7 +81,9 @@ class GetOrder implements ResolverInterface
         }
 
         $orderNumber = $args['order_number'] ?? $args['order_id'];
-        $identifierType = isset($args['order_id']) ? OrderLocator::IDENTIFIER_TYPE_ENTITY_ID : OrderLocator::IDENTIFIER_TYPE_INCREMENT_ID;
+        $identifierType = isset($args['order_id'])
+            ? OrderLocatorInterface::IDENTIFIER_TYPE_ENTITY_ID
+            : OrderLocatorInterface::IDENTIFIER_TYPE_INCREMENT_ID;
 
         try {
             $order = $this->orderLocator->getByIdentifier($orderNumber, $identifierType);

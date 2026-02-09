@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 use Magento\Sales\Model\Order\Payment;
 
 class OrderPaymentMethod implements ResolverInterface
@@ -14,22 +16,21 @@ class OrderPaymentMethod implements ResolverInterface
     /**
      * Required ACL resource for viewing order payment methods
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_ORDER_VIEW;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization
+        TokenAuthorizationInterface $tokenAuthorization
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
     }
-
 
     /**
      * Resolves the GraphQL query for retrieving the order payment method.
@@ -107,5 +108,4 @@ class OrderPaymentMethod implements ResolverInterface
     {
         return (float) $payment->getAmountOrdered() ?? null;
     }
-
 }

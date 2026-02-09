@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\GraphQl\Query\ResolverInterface;
@@ -8,22 +10,21 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\QuoteFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Sales\Model\Order;
-use Tapbuy\RedirectTracking\Model\Authorization\TokenAuthorization;
-use Tapbuy\CheckoutGraphql\Helper\CartHelper;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class UnlockCart implements ResolverInterface
 {
     /**
      * Required ACL resource for unlocking carts
      */
-    private const ACL_RESOURCE = TokenAuthorization::TAPBUY_CART_UNLOCK;
+    private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_UNLOCK;
 
     /**
-     * @var TokenAuthorization
+     * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
 
@@ -38,41 +39,33 @@ class UnlockCart implements ResolverInterface
     private $cartRepository;
 
     /**
-     * @var QuoteFactory
+     * @var CartResolverInterface
      */
-    private $quoteFactory;
+    private $cartResolver;
 
     /**
-     * @var CartHelper
-     */
-    private $cartHelper;
-
-    /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param TokenAuthorization $tokenAuthorization
+     * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
-     * @param QuoteFactory $quoteFactory
-     * @param CartHelper $cartHelper
-     * @param TapbuyLogger $logger
+     * @param CartResolverInterface $cartResolver
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorization $tokenAuthorization,
+        TokenAuthorizationInterface $tokenAuthorization,
         OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
-        QuoteFactory $quoteFactory,
-        CartHelper $cartHelper,
-        TapbuyLogger $logger
+        CartResolverInterface $cartResolver,
+        LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->cartRepository = $cartRepository;
-        $this->quoteFactory = $quoteFactory;
-        $this->cartHelper = $cartHelper;
+        $this->cartResolver = $cartResolver;
         $this->logger = $logger;
     }
 
@@ -102,19 +95,19 @@ class UnlockCart implements ResolverInterface
 
         $unlockReason = $args['unlock_reason'] ?? null;
 
-        // Handle masked cart ID conversion first
-        $cartId = $this->cartHelper->getRealCartId($args['cart_id']);
+        // Resolve cart ID (handles masked ID conversion)
+        $cartId = $this->cartResolver->resolveCartId($args['cart_id']);
 
         $cancelOrders = true;
 
-        if (!$unlockReason === 'update_payment_details') {
+        if ($unlockReason !== 'update_payment_details') {
             // Update order status if order exists
-            $this->updateOrderStatus($cartId, $unlockReason);
+            $this->updateOrderStatus((string) $cartId, $unlockReason);
             $cancelOrders = false;
         }
 
         // Reactivate the cart
-        $cart = $this->reactivateCart($cartId, $cancelOrders);
+        $cart = $this->reactivateCart((string) $cartId, $cancelOrders);
 
         return [
             'cart' => $cart
@@ -152,11 +145,14 @@ class UnlockCart implements ResolverInterface
                 $paymentMethodInstance = $order->getPayment()->getMethodInstance();
                 $orderStatus = $paymentMethodInstance->getConfigData($configDataKey);
             } catch (\Exception $e) {
-                $this->logger->warning('Checkout-GraphQL: Failed to get order status from payment method, using canceled', [
-                    'order_id' => $order->getIncrementId(),
-                    'config_key' => $configDataKey,
-                    'error' => $e->getMessage(),
-                ]);
+                $this->logger->warning(
+                    'Checkout-GraphQL: Failed to get order status from payment method, using canceled',
+                    [
+                        'order_id' => $order->getIncrementId(),
+                        'config_key' => $configDataKey,
+                        'error' => $e->getMessage(),
+                    ]
+                );
                 $orderStatus = 'canceled';
             }
 
@@ -193,19 +189,20 @@ class UnlockCart implements ResolverInterface
     }
 
     /**
-     * Reactivate the cart
-     * With option to cancel associated orders
+     * Reactivate the cart.
      *
-     * @param string $cartId
+     * With option to cancel associated orders.
+     *
+     * @param string $cartId The numeric cart ID
      * @param bool $cancelOrders
      * @return array
      */
     private function reactivateCart(string $cartId, bool $cancelOrders): array
     {
         try {
-            $quote = $this->quoteFactory->create()->load($cartId, 'entity_id');
+            $quote = $this->cartRepository->get((int) $cartId);
         } catch (\Exception $e) {
-            $this->logger->logException($e, 'Error loading cart for reactivation', [
+            $this->logger->logException('Error loading cart for reactivation', $e, [
                 'cart_id' => $cartId,
             ]);
             return [
@@ -216,7 +213,7 @@ class UnlockCart implements ResolverInterface
         }
 
         if ($quote->getId()) {
-            $quote->setIsActive(1);
+            $quote->setIsActive(true);
             if ($cancelOrders) {
                 $quote->setReservedOrderId(null);
             }

@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tapbuy\CheckoutGraphql\Plugin;
 
 use Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\QuoteIdMaskFactory;
 use Magento\Framework\Serialize\SerializerInterface;
-use Tapbuy\RedirectTracking\Logger\TapbuyLogger;
+use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
+use Tapbuy\RedirectTracking\Api\LoggerInterface;
+use Tapbuy\RedirectTracking\Api\TapbuyConstants;
+use Tapbuy\RedirectTracking\Api\TapbuyRequestDetectorInterface;
 
 class SetPaymentMethodOnCartPlugin
 {
@@ -18,9 +22,9 @@ class SetPaymentMethodOnCartPlugin
     private $cartRepository;
 
     /**
-     * @var QuoteIdMaskFactory
+     * @var CartResolverInterface
      */
-    private $quoteIdMaskFactory;
+    private $cartResolver;
 
     /**
      * @var SerializerInterface
@@ -28,27 +32,45 @@ class SetPaymentMethodOnCartPlugin
     private $serializer;
 
     /**
-     * @var TapbuyLogger
+     * @var LoggerInterface
      */
     private $logger;
 
+    /**
+     * @var TapbuyRequestDetectorInterface
+     */
+    private $requestDetector;
+
+    /**
+     * Constructor
+     *
+     * @param CartRepositoryInterface $cartRepository
+     * @param CartResolverInterface $cartResolver
+     * @param SerializerInterface $serializer
+     * @param LoggerInterface $logger
+     * @param TapbuyRequestDetectorInterface $requestDetector
+     */
     public function __construct(
         CartRepositoryInterface $cartRepository,
-        QuoteIdMaskFactory $quoteIdMaskFactory,
+        CartResolverInterface $cartResolver,
         SerializerInterface $serializer,
-        TapbuyLogger $logger
+        LoggerInterface $logger,
+        TapbuyRequestDetectorInterface $requestDetector
     ) {
         $this->cartRepository = $cartRepository;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
+        $this->cartResolver = $cartResolver;
         $this->serializer = $serializer;
         $this->logger = $logger;
+        $this->requestDetector = $requestDetector;
     }
 
     /**
+     * After resolve plugin for SetPaymentMethodOnCart.
+     *
      * @param SetPaymentMethodOnCart $subject
      * @param mixed $result
      * @param Field $field
-     * @param $context
+     * @param ContextInterface $context
      * @param ResolveInfo $info
      * @param array|null $value
      * @param array|null $args
@@ -63,6 +85,11 @@ class SetPaymentMethodOnCartPlugin
         array $value = null,
         array $args = null
     ) {
+        // Early return for non-Tapbuy requests to avoid unnecessary processing
+        if (!$this->requestDetector->isTapbuyCall()) {
+            return $result;
+        }
+
         try {
             $cartId = $args['input']['cart_id'] ?? null;
             $paymentMethod = $args['input']['payment_method'] ?? null;
@@ -91,13 +118,13 @@ class SetPaymentMethodOnCartPlugin
      */
     private function setTapbuyAdditionalInformation(string $cartId, array $additionalInfo): void
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quote = $this->cartRepository->get($quoteIdMask->getQuoteId());
+        $quoteId = $this->cartResolver->resolveCartId($cartId);
+        $quote = $this->cartRepository->get($quoteId);
 
         $payment = $quote->getPayment();
 
         $payment->setAdditionalInformation(
-            'tapbuy',
+            TapbuyConstants::PAYMENT_ADDITIONAL_INFO_KEY,
             $this->serializer->serialize($additionalInfo)
         );
         $this->cartRepository->save($quote);
