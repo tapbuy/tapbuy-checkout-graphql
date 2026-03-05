@@ -118,8 +118,7 @@ class SetPaymentMethodOnCartPlugin
      */
     private function setTapbuyAdditionalInformation(string $cartId, array $additionalInfo): void
     {
-        $quoteId = $this->cartResolver->resolveCartId($cartId);
-        $quote = $this->cartRepository->get($quoteId);
+        $quote = $this->cartResolver->resolveAndLoadQuote($cartId);
 
         $payment = $quote->getPayment();
 
