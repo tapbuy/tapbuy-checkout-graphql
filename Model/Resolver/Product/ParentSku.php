@@ -10,6 +10,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 
 /**
  * Resolver for parent_sku field on ProductInterface.
@@ -30,15 +31,23 @@ class ParentSku implements ResolverInterface
     private ProductRepositoryInterface $productRepository;
 
     /**
+     * @var ConfigInterface
+     */
+    private ConfigInterface $config;
+
+    /**
      * @param ConfigurableType $configurableType
      * @param ProductRepositoryInterface $productRepository
+     * @param ConfigInterface $config
      */
     public function __construct(
         ConfigurableType $configurableType,
-        ProductRepositoryInterface $productRepository
+        ProductRepositoryInterface $productRepository,
+        ConfigInterface $config
     ) {
         $this->configurableType = $configurableType;
         $this->productRepository = $productRepository;
+        $this->config = $config;
     }
 
     /**
@@ -58,6 +67,10 @@ class ParentSku implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ): ?string {
+        if (!$this->config->isEnabled()) {
+            return null;
+        }
+
         if (!isset($value['model'])) {
             return null;
         }

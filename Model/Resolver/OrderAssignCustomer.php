@@ -15,6 +15,7 @@ use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Model\Order\CustomerAssignment;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
 use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 
@@ -29,6 +30,11 @@ class OrderAssignCustomer implements ResolverInterface
      * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
+
+    /**
+     * @var ConfigInterface
+     */
+    private $config;
 
     /**
      * @var OrderDataFormatterInterface
@@ -56,19 +62,22 @@ class OrderAssignCustomer implements ResolverInterface
      * @param CustomerRepositoryInterface $customerRepository
      * @param CustomerAssignment $customerAssignment
      * @param OrderLocatorInterface $orderLocator
+     * @param ConfigInterface $config
      */
     public function __construct(
         TokenAuthorizationInterface $tokenAuthorization,
         OrderDataFormatterInterface $orderFormatter,
         CustomerRepositoryInterface $customerRepository,
         CustomerAssignment $customerAssignment,
-        OrderLocatorInterface $orderLocator
+        OrderLocatorInterface $orderLocator,
+        ConfigInterface $config
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderFormatter = $orderFormatter;
         $this->customerRepository = $customerRepository;
         $this->customerAssignment = $customerAssignment;
         $this->orderLocator = $orderLocator;
+        $this->config = $config;
     }
 
     /**
@@ -90,6 +99,10 @@ class OrderAssignCustomer implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            throw new GraphQlInputException(__('Tapbuy is disabled.'));
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['order_id'])) {

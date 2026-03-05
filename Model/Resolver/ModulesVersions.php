@@ -10,10 +10,12 @@ use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
+use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Module\Manager as ModuleManager;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class ModulesVersions implements ResolverInterface
@@ -27,6 +29,11 @@ class ModulesVersions implements ResolverInterface
      * @var TokenAuthorizationInterface
      */
     private $tokenAuthorization;
+
+    /**
+     * @var ConfigInterface
+     */
+    private $config;
 
     /**
      * @var ComponentRegistrar
@@ -59,6 +66,7 @@ class ModulesVersions implements ResolverInterface
      * @param File $file
      * @param Json $json
      * @param ModuleManager $moduleManager
+     * @param ConfigInterface $config
      * @param LoggerInterface $logger
      */
     public function __construct(
@@ -67,6 +75,7 @@ class ModulesVersions implements ResolverInterface
         File $file,
         Json $json,
         ModuleManager $moduleManager,
+        ConfigInterface $config,
         LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
@@ -74,6 +83,7 @@ class ModulesVersions implements ResolverInterface
         $this->file = $file;
         $this->json = $json;
         $this->moduleManager = $moduleManager;
+        $this->config = $config;
         $this->logger = $logger;
     }
 
@@ -101,6 +111,11 @@ class ModulesVersions implements ResolverInterface
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         $tapbuyModules = [];
+
+        if (!$this->config->isEnabled()) {
+            $tapbuyModules[] = ['name' => 'Tapbuy', 'version' => 'Tapbuy configuration is disabled', 'enabled' => false];
+        }
+
         $allModules = $this->componentRegistrar->getPaths(ComponentRegistrar::MODULE);
 
         foreach ($allModules as $moduleName => $modulePath) {

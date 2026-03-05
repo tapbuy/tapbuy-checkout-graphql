@@ -9,6 +9,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 
 class Customer implements ResolverInterface
 {
@@ -23,12 +24,20 @@ class Customer implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization
+        TokenAuthorizationInterface $tokenAuthorization,
+        ConfigInterface $config
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
+        $this->config = $config;
     }
 
     /**
@@ -52,6 +61,10 @@ class Customer implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            return null;
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!isset($value['model'])) {

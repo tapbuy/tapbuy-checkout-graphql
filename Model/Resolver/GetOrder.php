@@ -11,6 +11,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
 use Tapbuy\RedirectTracking\Api\Order\OrderLocatorInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -28,8 +29,14 @@ class GetOrder implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @var OrderDataFormatterInterface
      */
+
     private $orderFormatter;
 
     /**
@@ -41,15 +48,18 @@ class GetOrder implements ResolverInterface
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderDataFormatterInterface $orderFormatter
      * @param OrderLocatorInterface $orderLocator
+     * @param ConfigInterface $config
      */
     public function __construct(
         TokenAuthorizationInterface $tokenAuthorization,
         OrderDataFormatterInterface $orderFormatter,
-        OrderLocatorInterface $orderLocator
+        OrderLocatorInterface $orderLocator,
+        ConfigInterface $config
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderFormatter = $orderFormatter;
         $this->orderLocator = $orderLocator;
+        $this->config = $config;
     }
 
     /**
@@ -74,6 +84,10 @@ class GetOrder implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            throw new GraphQlInputException(__('Tapbuy is disabled.'));
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['order_number']) && empty($args['order_id'])) {
