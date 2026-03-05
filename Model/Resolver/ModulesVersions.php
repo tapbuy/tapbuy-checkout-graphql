@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Framework\Component\ComponentRegistrar;
-use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
-use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Module\Manager as ModuleManager;
@@ -113,7 +111,7 @@ class ModulesVersions implements ResolverInterface
         $tapbuyModules = [];
 
         if (!$this->config->isEnabled()) {
-            $tapbuyModules[] = ['name' => 'Tapbuy', 'version' => 'Tapbuy configuration is disabled', 'enabled' => false];
+            $tapbuyModules[] = ['name' => 'Tapbuy configuration is disabled', 'version' => 'N/A', 'enabled' => false];
         }
 
         $allModules = $this->componentRegistrar->getPaths(ComponentRegistrar::MODULE);

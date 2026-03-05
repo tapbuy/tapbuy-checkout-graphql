@@ -36,7 +36,6 @@ class GetOrder implements ResolverInterface
     /**
      * @var OrderDataFormatterInterface
      */
-
     private $orderFormatter;
 
     /**
