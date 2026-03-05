@@ -14,6 +14,7 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
 use Magento\Sales\Model\Order;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class UnlockCart implements ResolverInterface
@@ -44,6 +45,11 @@ class UnlockCart implements ResolverInterface
     private $cartResolver;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -53,6 +59,7 @@ class UnlockCart implements ResolverInterface
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
      * @param CartResolverInterface $cartResolver
+     * @param ConfigInterface $config
      * @param LoggerInterface $logger
      */
     public function __construct(
@@ -60,12 +67,14 @@ class UnlockCart implements ResolverInterface
         OrderCollectionFactory $orderCollectionFactory,
         CartRepositoryInterface $cartRepository,
         CartResolverInterface $cartResolver,
+        ConfigInterface $config,
         LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->cartRepository = $cartRepository;
         $this->cartResolver = $cartResolver;
+        $this->config = $config;
         $this->logger = $logger;
     }
 
@@ -87,6 +96,10 @@ class UnlockCart implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            throw new GraphQlInputException(__('Tapbuy is disabled.'));
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['cart_id'])) {

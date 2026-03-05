@@ -9,6 +9,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Magento\Sales\Model\Order\Payment;
 
 class OrderPaymentMethod implements ResolverInterface
@@ -24,12 +25,20 @@ class OrderPaymentMethod implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization
+        TokenAuthorizationInterface $tokenAuthorization,
+        ConfigInterface $config
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
+        $this->config = $config;
     }
 
     /**
@@ -50,6 +59,10 @@ class OrderPaymentMethod implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            return null;
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!isset($value['model'])) {

@@ -13,6 +13,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\CustomerGraphQl\Model\Customer\ExtractCustomerData;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 
 class CustomerSearch implements ResolverInterface
 {
@@ -37,6 +38,11 @@ class CustomerSearch implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorizationInterface $tokenAuthorization
@@ -45,10 +51,12 @@ class CustomerSearch implements ResolverInterface
         CustomerRepositoryInterface $customerRepository,
         ExtractCustomerData $extractCustomerData,
         TokenAuthorizationInterface $tokenAuthorization,
+        ConfigInterface $config
     ) {
         $this->customerRepository = $customerRepository;
         $this->extractCustomerData = $extractCustomerData;
         $this->tokenAuthorization = $tokenAuthorization;
+        $this->config = $config;
     }
 
     /**
@@ -73,6 +81,10 @@ class CustomerSearch implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            throw new GraphQlInputException(__('Tapbuy is disabled.'));
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['email'])) {

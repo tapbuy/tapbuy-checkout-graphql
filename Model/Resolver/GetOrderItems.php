@@ -17,6 +17,7 @@ use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\SalesGraphQl\Model\OrderItem\DataProvider as OrderItemProvider;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 
 /**
  * Resolve order items for order.
@@ -34,6 +35,11 @@ class GetOrderItems implements ResolverInterface
     private $tokenAuthorization;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @var ValueFactory
      */
     private $valueFactory;
@@ -47,15 +53,18 @@ class GetOrderItems implements ResolverInterface
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ValueFactory $valueFactory
      * @param OrderItemProvider $orderItemProvider
+     * @param ConfigInterface $config
      */
     public function __construct(
         TokenAuthorizationInterface $tokenAuthorization,
         ValueFactory $valueFactory,
-        OrderItemProvider $orderItemProvider
+        OrderItemProvider $orderItemProvider,
+        ConfigInterface $config
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->valueFactory = $valueFactory;
         $this->orderItemProvider = $orderItemProvider;
+        $this->config = $config;
     }
 
     /**
@@ -72,6 +81,10 @@ class GetOrderItems implements ResolverInterface
      */
     public function resolve(Field $field, $context, ResolveInfo $info, array $value = null, array $args = null)
     {
+        if (!$this->config->isEnabled()) {
+            return [];
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (!(($value['model'] ?? null) instanceof OrderInterface)) {
