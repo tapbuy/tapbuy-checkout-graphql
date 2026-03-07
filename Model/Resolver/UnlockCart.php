@@ -148,13 +148,11 @@ class UnlockCart implements ResolverInterface
                 $msgTxt .= "payment refused";
             }
 
-            // Set message to order
-            $message = $order->addStatusHistoryComment($msgTxt);
-            $message->setIsCustomerNotified(null);
-
             // Cancel the order (release stock, cancel items, etc.)
             // cancel() and registerCancellation() set state + status via getStateDefaultStatus()
             if ($order->canCancel()) {
+                $order->addStatusHistoryComment($msgTxt)
+                    ->setIsCustomerNotified(null);
                 $order->cancel();
             } elseif ($order->isPaymentReview() || $order->isFraudDetected()) {
                 // payment_review/fraud orders can't use cancel() — use registerCancellation() directly
@@ -162,15 +160,21 @@ class UnlockCart implements ResolverInterface
                     $order->getPayment()->cancel();
                 } catch (\Exception $e) {
                     $this->logger->warning(
-                        'Checkout-GraphQL: Failed to cancel payment for payment_review order',
+                        'Checkout-GraphQL: Failed to cancel payment during unlock',
                         [
                             'order_id' => $order->getIncrementId(),
+                            'state' => $order->getState(),
+                            'status' => $order->getStatus(),
                             'error' => $e->getMessage(),
                         ]
                     );
                 }
+                // registerCancellation() adds its own status history comment
                 $order->registerCancellation($msgTxt);
             } else {
+                $order->addStatusHistoryComment(
+                    'Tapbuy Unlock: cancellation attempted but not possible (state: ' . $order->getState() . ')'
+                )->setIsCustomerNotified(null);
                 $this->logger->warning(
                     'Checkout-GraphQL: Order could not be canceled during unlock',
                     [
