@@ -143,40 +143,53 @@ class UnlockCart implements ResolverInterface
             // Definition of the unlock reason
             $msgTxt = "Tapbuy Unlock: ";
             if ($unlockReason === 'cancel') {
-                $configDataKey = "order_status_payment_canceled";
                 $msgTxt .= "payment canceled";
             } else {
-                $configDataKey = "order_status_payment_refused";
                 $msgTxt .= "payment refused";
             }
 
-            // Set message to order
-            $message = $order->addStatusHistoryComment($msgTxt);
-            $message->setIsCustomerNotified(null);
-
-            try {
-                $paymentMethodInstance = $order->getPayment()->getMethodInstance();
-                $orderStatus = $paymentMethodInstance->getConfigData($configDataKey);
-            } catch (\Exception $e) {
+            // Cancel the order (release stock, cancel items, etc.)
+            // cancel() and registerCancellation() set state + status via getStateDefaultStatus()
+            if ($order->canCancel()) {
+                $order->addStatusHistoryComment($msgTxt)
+                    ->setIsCustomerNotified(null);
+                $order->cancel();
+            } elseif ($order->isPaymentReview() || $order->isFraudDetected()) {
+                // payment_review/fraud orders can't use cancel() — use registerCancellation() directly
+                try {
+                    $order->getPayment()->cancel();
+                } catch (\Exception $e) {
+                    $this->logger->warning(
+                        'Checkout-GraphQL: Failed to cancel payment during unlock',
+                        [
+                            'order_id' => $order->getIncrementId(),
+                            'state' => $order->getState(),
+                            'status' => $order->getStatus(),
+                            'error' => $e->getMessage(),
+                        ]
+                    );
+                }
+                // registerCancellation() adds its own status history comment
+                $order->registerCancellation($msgTxt);
+            } else {
+                $order->addStatusHistoryComment(
+                    'Tapbuy Unlock: cancellation attempted but not possible (state: ' . $order->getState() . ')'
+                )->setIsCustomerNotified(null);
                 $this->logger->warning(
-                    'Checkout-GraphQL: Failed to get order status from payment method, using canceled',
+                    'Checkout-GraphQL: Order could not be canceled during unlock',
                     [
                         'order_id' => $order->getIncrementId(),
-                        'config_key' => $configDataKey,
-                        'error' => $e->getMessage(),
+                        'state' => $order->getState(),
+                        'status' => $order->getStatus(),
                     ]
                 );
-                $orderStatus = 'canceled';
             }
 
-            // Ensure the order is canceled, release stock, etc.
-            $order->cancel();
-            // Set the status and save the order
-            $order->setStatus($orderStatus)->save();
+            $order->save();
 
             $this->logger->debug('Checkout-GraphQL: Updated order status during unlock', [
                 'order_id' => $order->getIncrementId(),
-                'new_status' => $orderStatus,
+                'new_status' => $order->getStatus(),
                 'unlock_reason' => $unlockReason,
             ]);
         }
