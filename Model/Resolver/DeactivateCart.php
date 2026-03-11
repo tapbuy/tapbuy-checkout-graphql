@@ -12,6 +12,7 @@ use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Tapbuy\RedirectTracking\Api\Authorization\TokenAuthorizationInterface;
 use Tapbuy\RedirectTracking\Api\Cart\CartResolverInterface;
+use Tapbuy\RedirectTracking\Api\ConfigInterface;
 use Tapbuy\RedirectTracking\Api\LoggerInterface;
 
 class DeactivateCart implements ResolverInterface
@@ -37,6 +38,11 @@ class DeactivateCart implements ResolverInterface
     private $cartResolver;
 
     /**
+     * @var ConfigInterface
+     */
+    private $config;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -45,17 +51,20 @@ class DeactivateCart implements ResolverInterface
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
      * @param CartResolverInterface $cartResolver
+     * @param ConfigInterface $config
      * @param LoggerInterface $logger
      */
     public function __construct(
         TokenAuthorizationInterface $tokenAuthorization,
         CartRepositoryInterface $cartRepository,
         CartResolverInterface $cartResolver,
+        ConfigInterface $config,
         LoggerInterface $logger
     ) {
         $this->tokenAuthorization = $tokenAuthorization;
         $this->cartRepository = $cartRepository;
         $this->cartResolver = $cartResolver;
+        $this->config = $config;
         $this->logger = $logger;
     }
 
@@ -77,6 +86,10 @@ class DeactivateCart implements ResolverInterface
         ?array $value = null,
         ?array $args = null
     ) {
+        if (!$this->config->isEnabled()) {
+            throw new GraphQlInputException(__('Tapbuy is disabled.'));
+        }
+
         $this->tokenAuthorization->authorize(self::ACL_RESOURCE);
 
         if (empty($args['cart_id'])) {
