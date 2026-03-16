@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
@@ -116,7 +117,16 @@ class DeactivateCart implements ResolverInterface
     {
         try {
             $quote = $this->cartResolver->resolveAndLoadQuote($cartId);
-        } catch (\Exception $e) {
+        } catch (NoSuchEntityException $e) {
+            $this->logger->warning('Checkout-GraphQL: Cart not found for deactivation', [
+                'cart_id' => $cartId,
+            ]);
+            return [
+                'model' => null,
+                'id' => null,
+                'is_active' => false
+            ];
+        } catch (\RuntimeException $e) {
             $this->logger->logException('Error loading cart for deactivation', $e, [
                 'cart_id' => $cartId,
             ]);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
@@ -158,7 +160,7 @@ class UnlockCart implements ResolverInterface
                 // payment_review/fraud orders can't use cancel() — use registerCancellation() directly
                 try {
                     $order->getPayment()->cancel();
-                } catch (\Exception $e) {
+                } catch (LocalizedException | \RuntimeException $e) {
                     $this->logger->warning(
                         'Checkout-GraphQL: Failed to cancel payment during unlock',
                         [
@@ -227,7 +229,16 @@ class UnlockCart implements ResolverInterface
     {
         try {
             $quote = $this->cartRepository->get((int) $cartId);
-        } catch (\Exception $e) {
+        } catch (NoSuchEntityException $e) {
+            $this->logger->warning('Checkout-GraphQL: Cart not found for reactivation', [
+                'cart_id' => $cartId,
+            ]);
+            return [
+                'model' => null,
+                'id' => null,
+                'is_active' => false
+            ];
+        } catch (\RuntimeException $e) {
             $this->logger->logException('Error loading cart for reactivation', $e, [
                 'cart_id' => $cartId,
             ]);

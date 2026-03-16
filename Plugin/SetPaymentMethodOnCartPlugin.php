@@ -103,7 +103,7 @@ class SetPaymentMethodOnCartPlugin
                     'additional_info_keys' => array_keys($tapbuyAdditionalInfo),
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (\RuntimeException $e) {
             $this->logger->logException('Error setting Tapbuy additional information', $e);
         }
 

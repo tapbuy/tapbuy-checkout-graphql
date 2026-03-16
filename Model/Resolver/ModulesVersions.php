@@ -140,7 +140,7 @@ class ModulesVersions implements ResolverInterface
                             'enabled' => $isEnabled
                         ];
                     }
-                } catch (\Exception $e) {
+                } catch (\RuntimeException $e) {
                     // Log the error and add module with unknown version
                     $this->logger->logException(
                         'Failed to read composer.json for module',
