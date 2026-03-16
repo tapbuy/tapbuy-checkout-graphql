@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Plugin;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\QuoteGraphQl\Model\Resolver\SetPaymentMethodOnCart;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
@@ -103,8 +105,12 @@ class SetPaymentMethodOnCartPlugin
                     'additional_info_keys' => array_keys($tapbuyAdditionalInfo),
                 ]);
             }
-        } catch (\RuntimeException $e) {
-            $this->logger->logException('Error setting Tapbuy additional information', $e);
+        } catch (NoSuchEntityException $e) {
+            $this->logger->logException('Checkout-GraphQL: Cart not found when setting Tapbuy additional info', $e, [
+                'cart_id' => $cartId,
+            ]);
+        } catch (LocalizedException $e) {
+            $this->logger->logException('Checkout-GraphQL: Error setting Tapbuy additional information', $e);
         }
 
         return $result;

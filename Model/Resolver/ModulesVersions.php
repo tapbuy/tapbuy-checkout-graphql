@@ -140,10 +140,20 @@ class ModulesVersions implements ResolverInterface
                             'enabled' => $isEnabled
                         ];
                     }
-                } catch (\RuntimeException $e) {
-                    // Log the error and add module with unknown version
+                } catch (\InvalidArgumentException $e) {
                     $this->logger->logException(
-                        'Failed to read composer.json for module',
+                        'Failed to parse composer.json for module (malformed JSON)',
+                        $e,
+                        ['module' => $moduleName, 'path' => $composerJsonPath]
+                    );
+                    $tapbuyModules[] = [
+                        'name' => $moduleName,
+                        'version' => 'Unknown',
+                        'enabled' => $isEnabled
+                    ];
+                } catch (\RuntimeException $e) {
+                    $this->logger->logException(
+                        'Failed to read composer.json for module (filesystem error)',
                         $e,
                         ['module' => $moduleName, 'path' => $composerJsonPath]
                     );
