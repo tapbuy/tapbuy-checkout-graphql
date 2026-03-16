@@ -128,7 +128,7 @@ class DeactivateCart implements ResolverInterface
             $this->logger->logException('Checkout-GraphQL: Error loading cart for deactivation', $e, [
                 'cart_id' => $cartId,
             ]);
-            throw new GraphQlInputException(__($e->getMessage()), $e);
+            throw new GraphQlInputException(__('Could not deactivate the cart.'), $e);
         }
 
         if ($quote->getId()) {
@@ -139,7 +139,7 @@ class DeactivateCart implements ResolverInterface
                 $this->logger->logException('Checkout-GraphQL: Failed to save deactivated cart', $e, [
                     'cart_id' => $cartId,
                 ]);
-                throw new GraphQlInputException(__($e->getMessage()), $e);
+                throw new GraphQlInputException(__('Could not deactivate the cart.'), $e);
             }
 
             $this->logger->debug('Checkout-GraphQL: Deactivated cart', [

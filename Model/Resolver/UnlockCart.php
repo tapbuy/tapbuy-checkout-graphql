@@ -253,10 +253,10 @@ class UnlockCart implements ResolverInterface
             ]);
             throw new GraphQlNoSuchEntityException(__('Cart not found: %1', $cartId), $e);
         } catch (LocalizedException $e) {
-            $this->logger->logException('Error loading cart for reactivation', $e, [
+            $this->logger->logException('Checkout-GraphQL: Error loading cart for reactivation', $e, [
                 'cart_id' => $cartId,
             ]);
-            throw new GraphQlInputException(__($e->getMessage()), $e);
+            throw new GraphQlInputException(__('Could not reactivate the cart.'), $e);
         }
 
         if ($quote->getId()) {
@@ -270,7 +270,7 @@ class UnlockCart implements ResolverInterface
                 $this->logger->logException('Checkout-GraphQL: Failed to save reactivated cart', $e, [
                     'cart_id' => $cartId,
                 ]);
-                throw new GraphQlInputException(__($e->getMessage()), $e);
+                throw new GraphQlInputException(__('Could not reactivate the cart.'), $e);
             }
 
             $this->logger->debug('Checkout-GraphQL: Reactivated cart', [
