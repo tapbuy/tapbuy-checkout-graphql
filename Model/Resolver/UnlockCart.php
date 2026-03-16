@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
+use Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
@@ -158,9 +161,19 @@ class UnlockCart implements ResolverInterface
                 // payment_review/fraud orders can't use cancel() — use registerCancellation() directly
                 try {
                     $order->getPayment()->cancel();
-                } catch (\Exception $e) {
+                } catch (LocalizedException $e) {
                     $this->logger->warning(
-                        'Checkout-GraphQL: Failed to cancel payment during unlock',
+                        'Checkout-GraphQL: Failed to cancel payment during unlock (Magento exception)',
+                        [
+                            'order_id' => $order->getIncrementId(),
+                            'state' => $order->getState(),
+                            'status' => $order->getStatus(),
+                            'error' => $e->getMessage(),
+                        ]
+                    );
+                } catch (\RuntimeException $e) {
+                    $this->logger->warning(
+                        'Checkout-GraphQL: Failed to cancel payment during unlock (gateway exception)',
                         [
                             'order_id' => $order->getIncrementId(),
                             'state' => $order->getState(),
@@ -185,7 +198,14 @@ class UnlockCart implements ResolverInterface
                 );
             }
 
-            $order->save();
+            try {
+                $order->save();
+            } catch (LocalizedException $e) {
+                $this->logger->logException('Checkout-GraphQL: Failed to save order during unlock', $e, [
+                    'order_id' => $order->getIncrementId(),
+                ]);
+                continue;
+            }
 
             $this->logger->debug('Checkout-GraphQL: Updated order status during unlock', [
                 'order_id' => $order->getIncrementId(),
@@ -227,15 +247,16 @@ class UnlockCart implements ResolverInterface
     {
         try {
             $quote = $this->cartRepository->get((int) $cartId);
-        } catch (\Exception $e) {
-            $this->logger->logException('Error loading cart for reactivation', $e, [
+        } catch (NoSuchEntityException $e) {
+            $this->logger->logException('Checkout-GraphQL: Cart not found for reactivation', $e, [
                 'cart_id' => $cartId,
             ]);
-            return [
-                'model' => null,
-                'id' => null,
-                'is_active' => false
-            ];
+            throw new GraphQlNoSuchEntityException(__('Cart not found: %1', $cartId), $e);
+        } catch (LocalizedException $e) {
+            $this->logger->logException('Checkout-GraphQL: Error loading cart for reactivation', $e, [
+                'cart_id' => $cartId,
+            ]);
+            throw new GraphQlInputException(__('Could not reactivate the cart.'), $e);
         }
 
         if ($quote->getId()) {
@@ -243,7 +264,14 @@ class UnlockCart implements ResolverInterface
             if ($cancelOrders) {
                 $quote->setReservedOrderId(null);
             }
-            $this->cartRepository->save($quote);
+            try {
+                $this->cartRepository->save($quote);
+            } catch (LocalizedException $e) {
+                $this->logger->logException('Checkout-GraphQL: Failed to save reactivated cart', $e, [
+                    'cart_id' => $cartId,
+                ]);
+                throw new GraphQlInputException(__('Could not reactivate the cart.'), $e);
+            }
 
             $this->logger->debug('Checkout-GraphQL: Reactivated cart', [
                 'cart_id' => $quote->getId(),

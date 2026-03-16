@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
-use Magento\Framework\GraphQl\Query\ResolverInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
+use Magento\Framework\GraphQl\Exception\GraphQlNoSuchEntityException;
+use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
@@ -116,20 +119,28 @@ class DeactivateCart implements ResolverInterface
     {
         try {
             $quote = $this->cartResolver->resolveAndLoadQuote($cartId);
-        } catch (\Exception $e) {
-            $this->logger->logException('Error loading cart for deactivation', $e, [
+        } catch (NoSuchEntityException $e) {
+            $this->logger->logException('Checkout-GraphQL: Cart not found for deactivation', $e, [
                 'cart_id' => $cartId,
             ]);
-            return [
-                'model' => null,
-                'id' => null,
-                'is_active' => false
-            ];
+            throw new GraphQlNoSuchEntityException(__('Cart not found: %1', $cartId), $e);
+        } catch (LocalizedException $e) {
+            $this->logger->logException('Checkout-GraphQL: Error loading cart for deactivation', $e, [
+                'cart_id' => $cartId,
+            ]);
+            throw new GraphQlInputException(__('Could not deactivate the cart.'), $e);
         }
 
         if ($quote->getId()) {
-            $quote->setIsActive(false);
-            $this->cartRepository->save($quote);
+            try {
+                $quote->setIsActive(false);
+                $this->cartRepository->save($quote);
+            } catch (LocalizedException $e) {
+                $this->logger->logException('Checkout-GraphQL: Failed to save deactivated cart', $e, [
+                    'cart_id' => $cartId,
+                ]);
+                throw new GraphQlInputException(__('Could not deactivate the cart.'), $e);
+            }
 
             $this->logger->debug('Checkout-GraphQL: Deactivated cart', [
                 'cart_id' => $quote->getId(),
