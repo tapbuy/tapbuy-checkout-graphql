@@ -5,22 +5,18 @@ declare(strict_types=1);
 namespace Tapbuy\CheckoutGraphql\Model;
 
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\Data\ShippingAssignmentInterface;
+use Magento\Sales\Api\Data\ShippingInterface;
 use Magento\SalesGraphQl\Model\Formatter\Order as OrderFormatter;
 use Tapbuy\CheckoutGraphql\Api\OrderDataFormatterInterface;
 
 class OrderDataFormatter implements OrderDataFormatterInterface
 {
     /**
-     * @var OrderFormatter
-     */
-    private $orderFormatter;
-
-    /**
      * @param OrderFormatter $orderFormatter
      */
-    public function __construct(OrderFormatter $orderFormatter)
+    public function __construct(private readonly OrderFormatter $orderFormatter)
     {
-        $this->orderFormatter = $orderFormatter;
     }
 
     /**
@@ -138,10 +134,10 @@ class OrderDataFormatter implements OrderDataFormatterInterface
     /**
      * Extract shipping items from a shipping assignment.
      *
-     * @param \Magento\Sales\Api\Data\ShippingAssignmentInterface $assignment
+     * @param ShippingAssignmentInterface $assignment
      * @return array
      */
-    private function extractShippingItems($assignment): array
+    private function extractShippingItems(ShippingAssignmentInterface $assignment): array
     {
         $items = [];
         foreach ($assignment->getItems() as $item) {
@@ -157,10 +153,10 @@ class OrderDataFormatter implements OrderDataFormatterInterface
     /**
      * Extract and format shipping address from shipping object.
      *
-     * @param \Magento\Sales\Api\Data\ShippingInterface|null $shipping
+     * @param ShippingInterface|null $shipping
      * @return array|null
      */
-    private function extractShippingAddress($shipping): ?array
+    private function extractShippingAddress(?ShippingInterface $shipping): ?array
     {
         if (!$shipping || !$shipping->getAddress()) {
             return null;

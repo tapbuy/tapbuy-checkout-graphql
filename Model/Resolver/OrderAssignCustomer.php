@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Config\Element\Field;
@@ -27,36 +28,6 @@ class OrderAssignCustomer implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_ASSIGN;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var OrderDataFormatterInterface
-     */
-    private $orderFormatter;
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
-     * @var CustomerAssignment
-     */
-    private $customerAssignment;
-
-    /**
-     * @var OrderLocatorInterface
-     */
-    private $orderLocator;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderDataFormatterInterface $orderFormatter
      * @param CustomerRepositoryInterface $customerRepository
@@ -65,19 +36,13 @@ class OrderAssignCustomer implements ResolverInterface
      * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        OrderDataFormatterInterface $orderFormatter,
-        CustomerRepositoryInterface $customerRepository,
-        CustomerAssignment $customerAssignment,
-        OrderLocatorInterface $orderLocator,
-        ConfigInterface $config
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly OrderDataFormatterInterface $orderFormatter,
+        private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly CustomerAssignment $customerAssignment,
+        private readonly OrderLocatorInterface $orderLocator,
+        private readonly ConfigInterface $config
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderFormatter = $orderFormatter;
-        $this->customerRepository = $customerRepository;
-        $this->customerAssignment = $customerAssignment;
-        $this->orderLocator = $orderLocator;
-        $this->config = $config;
     }
 
     /**
@@ -173,7 +138,7 @@ class OrderAssignCustomer implements ResolverInterface
      * @return \Magento\Customer\Api\Data\CustomerInterface
      * @throws GraphQlNoSuchEntityException
      */
-    private function getCustomerById(int $customerId)
+    private function getCustomerById(int $customerId): CustomerInterface
     {
         try {
             return $this->customerRepository->getById($customerId);

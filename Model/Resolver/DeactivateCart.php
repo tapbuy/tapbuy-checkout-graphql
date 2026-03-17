@@ -26,31 +26,6 @@ class DeactivateCart implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_DEACTIVATE;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
-
-    /**
-     * @var CartResolverInterface
-     */
-    private $cartResolver;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param CartRepositoryInterface $cartRepository
      * @param CartResolverInterface $cartResolver
@@ -58,17 +33,12 @@ class DeactivateCart implements ResolverInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        CartRepositoryInterface $cartRepository,
-        CartResolverInterface $cartResolver,
-        ConfigInterface $config,
-        LoggerInterface $logger
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly CartRepositoryInterface $cartRepository,
+        private readonly CartResolverInterface $cartResolver,
+        private readonly ConfigInterface $config,
+        private readonly LoggerInterface $logger
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->cartRepository = $cartRepository;
-        $this->cartResolver = $cartResolver;
-        $this->config = $config;
-        $this->logger = $logger;
     }
 
     /**

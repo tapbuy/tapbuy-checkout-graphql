@@ -24,41 +24,17 @@ class GetOrder implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var OrderDataFormatterInterface
-     */
-    private $orderFormatter;
-
-    /**
-     * @var OrderLocatorInterface
-     */
-    private $orderLocator;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderDataFormatterInterface $orderFormatter
      * @param OrderLocatorInterface $orderLocator
      * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        OrderDataFormatterInterface $orderFormatter,
-        OrderLocatorInterface $orderLocator,
-        ConfigInterface $config
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly OrderDataFormatterInterface $orderFormatter,
+        private readonly OrderLocatorInterface $orderLocator,
+        private readonly ConfigInterface $config
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderFormatter = $orderFormatter;
-        $this->orderLocator = $orderLocator;
-        $this->config = $config;
     }
 
     /**

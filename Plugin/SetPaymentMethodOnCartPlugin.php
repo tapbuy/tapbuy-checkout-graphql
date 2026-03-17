@@ -84,8 +84,8 @@ class SetPaymentMethodOnCartPlugin
         Field $field,
         $context,
         ResolveInfo $info,
-        array $value = null,
-        array $args = null
+        ?array $value = null,
+        ?array $args = null
     ) {
         // Early return for non-Tapbuy requests to avoid unnecessary processing
         if (!$this->requestDetector->isTapbuyCall()) {

@@ -24,41 +24,6 @@ class ModulesVersions implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_MODULES_VERSIONS;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var ComponentRegistrar
-     */
-    private $componentRegistrar;
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var Json
-     */
-    private $json;
-
-    /**
-     * @var ModuleManager
-     */
-    private $moduleManager;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ComponentRegistrar $componentRegistrar
      * @param File $file
@@ -68,21 +33,14 @@ class ModulesVersions implements ResolverInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        ComponentRegistrar $componentRegistrar,
-        File $file,
-        Json $json,
-        ModuleManager $moduleManager,
-        ConfigInterface $config,
-        LoggerInterface $logger
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly ComponentRegistrar $componentRegistrar,
+        private readonly File $file,
+        private readonly Json $json,
+        private readonly ModuleManager $moduleManager,
+        private readonly ConfigInterface $config,
+        private readonly LoggerInterface $logger
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->componentRegistrar = $componentRegistrar;
-        $this->file = $file;
-        $this->json = $json;
-        $this->moduleManager = $moduleManager;
-        $this->config = $config;
-        $this->logger = $logger;
     }
 
     /**

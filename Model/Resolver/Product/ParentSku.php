@@ -21,33 +21,15 @@ use Tapbuy\RedirectTracking\Api\ConfigInterface;
 class ParentSku implements ResolverInterface
 {
     /**
-     * @var ConfigurableType
-     */
-    private ConfigurableType $configurableType;
-
-    /**
-     * @var ProductRepositoryInterface
-     */
-    private ProductRepositoryInterface $productRepository;
-
-    /**
-     * @var ConfigInterface
-     */
-    private ConfigInterface $config;
-
-    /**
      * @param ConfigurableType $configurableType
      * @param ProductRepositoryInterface $productRepository
      * @param ConfigInterface $config
      */
     public function __construct(
-        ConfigurableType $configurableType,
-        ProductRepositoryInterface $productRepository,
-        ConfigInterface $config
+        private readonly ConfigurableType $configurableType,
+        private readonly ProductRepositoryInterface $productRepository,
+        private readonly ConfigInterface $config
     ) {
-        $this->configurableType = $configurableType;
-        $this->productRepository = $productRepository;
-        $this->config = $config;
     }
 
     /**

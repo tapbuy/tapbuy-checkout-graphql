@@ -23,41 +23,17 @@ class CustomerSearch implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CUSTOMER_SEARCH;
 
     /**
-     * @var CustomerRepositoryInterface
-     */
-    private $customerRepository;
-
-    /**
-     * @var ExtractCustomerData
-     */
-    private $extractCustomerData;
-
-    /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ConfigInterface $config
      */
     public function __construct(
-        CustomerRepositoryInterface $customerRepository,
-        ExtractCustomerData $extractCustomerData,
-        TokenAuthorizationInterface $tokenAuthorization,
-        ConfigInterface $config
+        private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly ExtractCustomerData $extractCustomerData,
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly ConfigInterface $config
     ) {
-        $this->customerRepository = $customerRepository;
-        $this->extractCustomerData = $extractCustomerData;
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->config = $config;
     }
 
     /**
