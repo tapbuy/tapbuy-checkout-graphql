@@ -19,33 +19,6 @@ use Tapbuy\RedirectTracking\Api\TapbuyRequestDetectorInterface;
 class SetPaymentMethodOnCartPlugin
 {
     /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
-
-    /**
-     * @var CartResolverInterface
-     */
-    private $cartResolver;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var TapbuyRequestDetectorInterface
-     */
-    private $requestDetector;
-
-    /**
-     * Constructor
-     *
      * @param CartRepositoryInterface $cartRepository
      * @param CartResolverInterface $cartResolver
      * @param SerializerInterface $serializer
@@ -53,17 +26,12 @@ class SetPaymentMethodOnCartPlugin
      * @param TapbuyRequestDetectorInterface $requestDetector
      */
     public function __construct(
-        CartRepositoryInterface $cartRepository,
-        CartResolverInterface $cartResolver,
-        SerializerInterface $serializer,
-        LoggerInterface $logger,
-        TapbuyRequestDetectorInterface $requestDetector
+        private readonly CartRepositoryInterface $cartRepository,
+        private readonly CartResolverInterface $cartResolver,
+        private readonly SerializerInterface $serializer,
+        private readonly LoggerInterface $logger,
+        private readonly TapbuyRequestDetectorInterface $requestDetector
     ) {
-        $this->cartRepository = $cartRepository;
-        $this->cartResolver = $cartResolver;
-        $this->serializer = $serializer;
-        $this->logger = $logger;
-        $this->requestDetector = $requestDetector;
     }
 
     /**
