@@ -30,41 +30,17 @@ class GetOrderItems implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var ValueFactory
-     */
-    private $valueFactory;
-
-    /**
-     * @var OrderItemProvider
-     */
-    private $orderItemProvider;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ValueFactory $valueFactory
      * @param OrderItemProvider $orderItemProvider
      * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        ValueFactory $valueFactory,
-        OrderItemProvider $orderItemProvider,
-        ConfigInterface $config
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly ValueFactory $valueFactory,
+        private readonly OrderItemProvider $orderItemProvider,
+        private readonly ConfigInterface $config
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->valueFactory = $valueFactory;
-        $this->orderItemProvider = $orderItemProvider;
-        $this->config = $config;
     }
 
     /**
@@ -79,7 +55,7 @@ class GetOrderItems implements ResolverInterface
      * @param array|null $args The arguments provided in the GraphQL query.
      * @return mixed The resolved data for the order items.
      */
-    public function resolve(Field $field, $context, ResolveInfo $info, array $value = null, array $args = null)
+    public function resolve(Field $field, $context, ResolveInfo $info, ?array $value = null, ?array $args = null)
     {
         if (!$this->config->isEnabled()) {
             return [];

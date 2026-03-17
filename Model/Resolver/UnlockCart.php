@@ -28,36 +28,6 @@ class UnlockCart implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CART_UNLOCK;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var OrderCollectionFactory
-     */
-    private $orderCollectionFactory;
-
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
-
-    /**
-     * @var CartResolverInterface
-     */
-    private $cartResolver;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param CartRepositoryInterface $cartRepository
@@ -66,19 +36,13 @@ class UnlockCart implements ResolverInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        OrderCollectionFactory $orderCollectionFactory,
-        CartRepositoryInterface $cartRepository,
-        CartResolverInterface $cartResolver,
-        ConfigInterface $config,
-        LoggerInterface $logger
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly OrderCollectionFactory $orderCollectionFactory,
+        private readonly CartRepositoryInterface $cartRepository,
+        private readonly CartResolverInterface $cartResolver,
+        private readonly ConfigInterface $config,
+        private readonly LoggerInterface $logger
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->orderCollectionFactory = $orderCollectionFactory;
-        $this->cartRepository = $cartRepository;
-        $this->cartResolver = $cartResolver;
-        $this->config = $config;
-        $this->logger = $logger;
     }
 
     /**

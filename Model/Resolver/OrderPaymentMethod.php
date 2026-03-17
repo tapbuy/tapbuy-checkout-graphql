@@ -20,25 +20,13 @@ class OrderPaymentMethod implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_ORDER_VIEW;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        ConfigInterface $config
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly ConfigInterface $config
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->config = $config;
     }
 
     /**
@@ -50,7 +38,6 @@ class OrderPaymentMethod implements ResolverInterface
      * @param array|null $value The value resolved by the parent field, if any.
      * @param array|null $args The arguments provided in the GraphQL query.
      * @return mixed The resolved payment method data for the order.
-     * @throws LocalizedException If an error occurs during resolution.
      */
     public function resolve(
         Field $field,

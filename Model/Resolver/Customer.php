@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tapbuy\CheckoutGraphql\Model\Resolver;
 
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Query\Resolver\ContextInterface;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
@@ -19,25 +20,13 @@ class Customer implements ResolverInterface
     private const ACL_RESOURCE = TokenAuthorizationInterface::TAPBUY_CUSTOMER_VIEW;
 
     /**
-     * @var TokenAuthorizationInterface
-     */
-    private $tokenAuthorization;
-
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
      * @param TokenAuthorizationInterface $tokenAuthorization
      * @param ConfigInterface $config
      */
     public function __construct(
-        TokenAuthorizationInterface $tokenAuthorization,
-        ConfigInterface $config
+        private readonly TokenAuthorizationInterface $tokenAuthorization,
+        private readonly ConfigInterface $config
     ) {
-        $this->tokenAuthorization = $tokenAuthorization;
-        $this->config = $config;
     }
 
     /**
@@ -88,10 +77,10 @@ class Customer implements ResolverInterface
     /**
      * Get customer ID
      *
-     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
+     * @param CustomerInterface $customer
      * @return int
      */
-    private function getCustomerId($customer)
+    private function getCustomerId(CustomerInterface $customer): int
     {
         return $customer->getId();
     }
