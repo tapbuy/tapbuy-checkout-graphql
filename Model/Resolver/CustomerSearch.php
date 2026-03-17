@@ -46,6 +46,7 @@ class CustomerSearch implements ResolverInterface
      * @param CustomerRepositoryInterface $customerRepository
      * @param ExtractCustomerData $extractCustomerData
      * @param TokenAuthorizationInterface $tokenAuthorization
+     * @param ConfigInterface $config
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
