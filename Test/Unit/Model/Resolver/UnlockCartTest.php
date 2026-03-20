@@ -86,8 +86,8 @@ class UnlockCartTest extends TestCase
         $quote->method('getIsActive')->willReturn(true);
         $this->cartRepository->method('get')->with(42)->willReturn($quote);
 
-        // With 'update_payment_details', orders should NOT be canceled but reservedOrderId should NOT be cleared
-        $quote->expects($this->never())->method('setReservedOrderId');
+        // With 'update_payment_details', order status is NOT updated (no collection query)
+        $this->orderCollectionFactory->expects($this->never())->method('create');
 
         $result = $this->resolver->resolve(
             $this->field,

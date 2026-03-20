@@ -10,6 +10,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\ShippingAssignmentInterface;
 use Magento\Sales\Api\Data\ShippingInterface;
+use Magento\Sales\Model\Order;
 use Magento\SalesGraphQl\Model\Formatter\Order as OrderFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +29,7 @@ class OrderDataFormatterTest extends TestCase
 
     public function testFormatReturnsBaseFormatterData(): void
     {
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn(null);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn(null);
@@ -47,7 +48,7 @@ class OrderDataFormatterTest extends TestCase
     public function testFormatAttachesShippingAddressModel(): void
     {
         $shippingAddress = $this->createMock(OrderAddressInterface::class);
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn($shippingAddress);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn(null);
@@ -64,7 +65,7 @@ class OrderDataFormatterTest extends TestCase
     public function testFormatAttachesBillingAddressModel(): void
     {
         $billingAddress = $this->createMock(OrderAddressInterface::class);
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn(null);
         $order->method('getBillingAddress')->willReturn($billingAddress);
         $order->method('getPayment')->willReturn(null);
@@ -81,7 +82,7 @@ class OrderDataFormatterTest extends TestCase
     public function testFormatAttachesPaymentModel(): void
     {
         $payment = $this->createMock(OrderPaymentInterface::class);
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn(null);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn($payment);
@@ -97,7 +98,9 @@ class OrderDataFormatterTest extends TestCase
 
     public function testFormatShippingAssignmentsFromExtensionAttributes(): void
     {
-        $address = $this->createMock(OrderAddressInterface::class);
+        $address = $this->getMockBuilder(OrderAddressInterface::class)
+            ->addMethods(['getData'])
+            ->getMockForAbstractClass();
         $address->method('getStreet')->willReturn(['123 Main St', 'Apt 4']);
         $address->method('getCountryId')->willReturn('US');
         $address->method('getData')->willReturn(['city' => 'NY']);
@@ -120,7 +123,7 @@ class OrderDataFormatterTest extends TestCase
             ->getMockForAbstractClass();
         $extensionAttributes->method('getShippingAssignments')->willReturn([$assignment]);
 
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn(null);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn(null);
@@ -139,7 +142,7 @@ class OrderDataFormatterTest extends TestCase
 
     public function testFormatShippingAssignmentsEmptyWhenNoExtensionAttributes(): void
     {
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn(null);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn(null);
@@ -156,7 +159,7 @@ class OrderDataFormatterTest extends TestCase
     public function testFormatPreservesExistingShippingAddressData(): void
     {
         $shippingAddress = $this->createMock(OrderAddressInterface::class);
-        $order = $this->createMock(OrderInterface::class);
+        $order = $this->getMockBuilder(Order::class)->disableOriginalConstructor()->getMock();
         $order->method('getShippingAddress')->willReturn($shippingAddress);
         $order->method('getBillingAddress')->willReturn(null);
         $order->method('getPayment')->willReturn(null);
