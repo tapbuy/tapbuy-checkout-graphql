@@ -19,6 +19,9 @@ jobs:
 
     env:
       COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+      # Pinned refs — keep in sync with composer.json constraints
+      REDIRECT_TRACKING_REF: 'develop'   # tapbuy/redirect-tracking require: ^1.8.0
+      DATA_SCRUBBER_REF: 'develop'        # tapbuy/data-scrubber require: ^1.0
 
     steps:
       - name: Checkout module
@@ -30,12 +33,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: tapbuy/magento-redirect-plugin
+          ref: ${{ env.REDIRECT_TRACKING_REF }}
           path: redirect-tracking-module
 
       - name: Checkout tapbuy/data-scrubber dependency
         uses: actions/checkout@v4
         with:
           repository: tapbuy/data-scrubber
+          ref: ${{ env.DATA_SCRUBBER_REF }}
           path: data-scrubber
 
       - name: Setup PHP 8.3
