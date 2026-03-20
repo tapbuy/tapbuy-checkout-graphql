@@ -26,6 +26,12 @@ jobs:
         with:
           path: module
 
+      - name: Checkout redirect-tracking dependency
+        uses: actions/checkout@v4
+        with:
+          repository: tapbuy/magento-redirect-plugin
+          path: redirect-tracking-module
+
       - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
@@ -56,6 +62,7 @@ jobs:
         run: |
           mkdir -p ~/magento/vendor/tapbuy
           cp -r module ~/magento/vendor/tapbuy/checkout-graphql
+          cp -r redirect-tracking-module ~/magento/vendor/tapbuy/redirect-tracking
 
       - name: Create test bootstrap
         run: |
@@ -65,6 +72,7 @@ jobs:
           require_once __DIR__ . '/../../dev/tests/unit/framework/bootstrap.php';
           $autoloader = include __DIR__ . '/../../vendor/autoload.php';
           $autoloader->addPsr4('Tapbuy\\CheckoutGraphql\\', __DIR__ . '/checkout-graphql/');
+          $autoloader->addPsr4('Tapbuy\\RedirectTracking\\', __DIR__ . '/redirect-tracking/');
           BOOTSTRAP
 
       - name: Run PHPUnit
