@@ -17,6 +17,9 @@
         "magento/module-customer": "^103.0",
         "tapbuy/redirect-tracking": "^1.8.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
     "autoload": {
         "files": [
             "registration.php"
@@ -24,5 +27,13 @@
         "psr-4": {
             "Tapbuy\\CheckoutGraphql\\": ""
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tapbuy\\CheckoutGraphql\\Test\\": "Test/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
