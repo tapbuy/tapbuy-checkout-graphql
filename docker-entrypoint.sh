@@ -3,6 +3,7 @@
 # Expects volumes:
 #   /module                      — checkout-graphql source (read-only)
 #   /tapbuy-redirect-tracking    — redirect-tracking source (read-only)
+#   /tapbuy-data-scrubber        — data-scrubber source (read-only)
 set -euo pipefail
 
 if [ ! -f /magento/vendor/autoload.php ]; then
@@ -19,9 +20,14 @@ fi
 
 mkdir -p /magento/vendor/tapbuy
 rm -rf /magento/vendor/tapbuy/checkout-graphql
+mkdir -p /magento/vendor/tapbuy/checkout-graphql
+cp -rT /module /magento/vendor/tapbuy/checkout-graphql
 rm -rf /magento/vendor/tapbuy/redirect-tracking
-cp -r /module /magento/vendor/tapbuy/checkout-graphql
-cp -r /tapbuy-redirect-tracking /magento/vendor/tapbuy/redirect-tracking
+mkdir -p /magento/vendor/tapbuy/redirect-tracking
+cp -rT /tapbuy-redirect-tracking /magento/vendor/tapbuy/redirect-tracking
+rm -rf /magento/vendor/tapbuy/data-scrubber
+mkdir -p /magento/vendor/tapbuy/data-scrubber
+cp -rT /tapbuy-data-scrubber /magento/vendor/tapbuy/data-scrubber
 
 cat > /magento/vendor/tapbuy/bootstrap.php << 'BOOTSTRAP'
 <?php
@@ -30,6 +36,7 @@ require_once __DIR__ . '/../../dev/tests/unit/framework/bootstrap.php';
 $autoloader = include __DIR__ . '/../../vendor/autoload.php';
 $autoloader->addPsr4('Tapbuy\\CheckoutGraphql\\', __DIR__ . '/checkout-graphql/');
 $autoloader->addPsr4('Tapbuy\\RedirectTracking\\', __DIR__ . '/redirect-tracking/');
+$autoloader->addPsr4('Tapbuy\\DataScrubber\\', __DIR__ . '/data-scrubber/src/');
 BOOTSTRAP
 
 cd /magento
