@@ -89,7 +89,7 @@ class GetOrderItemsTest extends TestCase
             ['model' => $order]
         );
 
-        // Only non-parent items should be in the result (item1 only)
+        // Only top-level items (no parentItemId) should be in the result (item1 only)
         $this->assertCount(1, $result);
     }
 }

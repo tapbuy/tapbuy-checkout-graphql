@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tapbuy\CheckoutGraphQl\Test\Integration\Model\Resolver;
+namespace Tapbuy\CheckoutGraphql\Test\Integration\Model\Resolver;
 
 use PHPUnit\Framework\TestCase;
 

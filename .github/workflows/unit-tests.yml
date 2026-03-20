@@ -32,6 +32,12 @@ jobs:
           repository: tapbuy/magento-redirect-plugin
           path: redirect-tracking-module
 
+      - name: Checkout tapbuy/data-scrubber dependency
+        uses: actions/checkout@v4
+        with:
+          repository: tapbuy/data-scrubber
+          path: data-scrubber
+
       - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
@@ -61,8 +67,12 @@ jobs:
       - name: Place module in Magento vendor
         run: |
           mkdir -p ~/magento/vendor/tapbuy
+          rm -rf ~/magento/vendor/tapbuy/checkout-graphql
+          rm -rf ~/magento/vendor/tapbuy/redirect-tracking
+          rm -rf ~/magento/vendor/tapbuy/data-scrubber
           cp -r module ~/magento/vendor/tapbuy/checkout-graphql
           cp -r redirect-tracking-module ~/magento/vendor/tapbuy/redirect-tracking
+          cp -r data-scrubber ~/magento/vendor/tapbuy/data-scrubber
 
       - name: Create test bootstrap
         run: |
@@ -73,6 +83,7 @@ jobs:
           $autoloader = include __DIR__ . '/../../vendor/autoload.php';
           $autoloader->addPsr4('Tapbuy\\CheckoutGraphql\\', __DIR__ . '/checkout-graphql/');
           $autoloader->addPsr4('Tapbuy\\RedirectTracking\\', __DIR__ . '/redirect-tracking/');
+          $autoloader->addPsr4('Tapbuy\\DataScrubber\\', __DIR__ . '/data-scrubber/src/');
           BOOTSTRAP
 
       - name: Run PHPUnit
