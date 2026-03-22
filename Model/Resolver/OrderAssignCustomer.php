@@ -93,27 +93,15 @@ class OrderAssignCustomer implements ResolverInterface
         }
         $customer = $this->getCustomerById($customerId);
 
-        if (!$order->getCustomerIsGuest()) {
-            if ((int)$order->getCustomerId() === $customerId) {
-                return [
-                    'success' => true,
-                    'order' => $this->orderFormatter->format($order)
-                ];
-            }
-
-            throw new GraphQlInputException(__('Order is already assigned to a customer.'));
+        $alreadyAssigned = $this->resolveAlreadyAssigned($order, $customerId);
+        if ($alreadyAssigned !== null) {
+            return $alreadyAssigned;
         }
 
-        $orderEmail = trim((string)$order->getCustomerEmail());
-        $customerEmail = trim((string)$customer->getEmail());
-
-        if ($orderEmail === '' || $customerEmail === '') {
-            throw new GraphQlInputException(__('Order or customer email is missing.'));
-        }
-
-        if (strcasecmp($orderEmail, $customerEmail) !== 0) {
-            throw new GraphQlInputException(__('Order email does not match the customer email.'));
-        }
+        $this->assertEmailsCompatible(
+            trim((string)$order->getCustomerEmail()),
+            trim((string)$customer->getEmail())
+        );
 
         try {
             $this->customerAssignment->execute($order, $customer);
@@ -179,5 +167,52 @@ class OrderAssignCustomer implements ResolverInterface
         }
 
         return $normalizedType;
+    }
+
+    /**
+     * Check if the order is already assigned (non-guest) and return result or throw if conflict.
+     *
+     * Returns null when the order is a guest order and assignment can proceed.
+     * Returns the formatted order array when already assigned to the same customer (idempotent).
+     * Throws when the order is assigned to a different customer.
+     *
+     * @param mixed $order
+     * @param int $customerId
+     * @return array|null
+     * @throws GraphQlInputException
+     */
+    private function resolveAlreadyAssigned($order, int $customerId): ?array
+    {
+        if ($order->getCustomerIsGuest()) {
+            return null;
+        }
+
+        if ((int)$order->getCustomerId() === $customerId) {
+            return [
+                'success' => true,
+                'order' => $this->orderFormatter->format($order)
+            ];
+        }
+
+        throw new GraphQlInputException(__('Order is already assigned to a customer.'));
+    }
+
+    /**
+     * Assert that the order and customer emails are present and match (case-insensitive).
+     *
+     * @param string $orderEmail
+     * @param string $customerEmail
+     * @return void
+     * @throws GraphQlInputException
+     */
+    private function assertEmailsCompatible(string $orderEmail, string $customerEmail): void
+    {
+        if ($orderEmail === '' || $customerEmail === '') {
+            throw new GraphQlInputException(__('Order or customer email is missing.'));
+        }
+
+        if (strcasecmp($orderEmail, $customerEmail) !== 0) {
+            throw new GraphQlInputException(__('Order email does not match the customer email.'));
+        }
     }
 }

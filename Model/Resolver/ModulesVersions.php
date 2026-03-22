@@ -75,55 +75,61 @@ class ModulesVersions implements ResolverInterface
         $allModules = $this->componentRegistrar->getPaths(ComponentRegistrar::MODULE);
 
         foreach ($allModules as $moduleName => $modulePath) {
-            // Check if module is under Tapbuy namespace
-            if (strpos($moduleName, 'Tapbuy_') === 0) {
-                $composerJsonPath = $modulePath . '/composer.json';
-                $isEnabled = $this->moduleManager->isEnabled($moduleName);
+            // Skip non-Tapbuy modules
+            if (strpos($moduleName, 'Tapbuy_') !== 0) {
+                continue;
+            }
 
-                try {
-                    if ($this->file->isExists($composerJsonPath)) {
-                        $composerContent = $this->file->fileGetContents($composerJsonPath);
-                        $composerData = $this->json->unserialize($composerContent);
+            $composerJsonPath = $modulePath . '/composer.json';
+            $isEnabled = $this->moduleManager->isEnabled($moduleName);
 
-                        $tapbuyModules[] = [
-                            'name' => $composerData['name'] ?? $moduleName,
-                            'version' => $composerData['version'] ?? 'Unknown',
-                            'enabled' => $isEnabled
-                        ];
-                    } else {
-                        // If no composer.json, still add module with unknown version
-                        $tapbuyModules[] = [
-                            'name' => $moduleName,
-                            'version' => 'Unknown',
-                            'enabled' => $isEnabled
-                        ];
-                    }
-                } catch (\InvalidArgumentException $e) {
-                    $this->logger->logException(
-                        'Failed to parse composer.json for module (malformed JSON)',
-                        $e,
-                        ['module' => $moduleName, 'path' => $composerJsonPath]
-                    );
-                    $tapbuyModules[] = [
-                        'name' => $moduleName,
-                        'version' => 'Unknown',
-                        'enabled' => $isEnabled
-                    ];
-                } catch (\RuntimeException $e) {
-                    $this->logger->logException(
-                        'Failed to read composer.json for module (filesystem error)',
-                        $e,
-                        ['module' => $moduleName, 'path' => $composerJsonPath]
-                    );
-                    $tapbuyModules[] = [
-                        'name' => $moduleName,
-                        'version' => 'Unknown',
-                        'enabled' => $isEnabled
-                    ];
-                }
+            try {
+                $tapbuyModules[] = $this->resolveModuleVersionEntry($moduleName, $composerJsonPath, $isEnabled);
+            } catch (\InvalidArgumentException $e) {
+                $this->logger->logException(
+                    'Failed to parse composer.json for module (malformed JSON)',
+                    $e,
+                    ['module' => $moduleName, 'path' => $composerJsonPath]
+                );
+                $tapbuyModules[] = ['name' => $moduleName, 'version' => 'Unknown', 'enabled' => $isEnabled];
+            } catch (\RuntimeException $e) {
+                $this->logger->logException(
+                    'Failed to read composer.json for module (filesystem error)',
+                    $e,
+                    ['module' => $moduleName, 'path' => $composerJsonPath]
+                );
+                $tapbuyModules[] = ['name' => $moduleName, 'version' => 'Unknown', 'enabled' => $isEnabled];
             }
         }
 
         return $tapbuyModules;
+    }
+
+    /**
+     * Resolve the version entry for a single Tapbuy module.
+     *
+     * Reads the module's composer.json if it exists; otherwise returns an Unknown version entry.
+     *
+     * @param string $moduleName
+     * @param string $composerJsonPath
+     * @param bool $isEnabled
+     * @return array
+     * @throws \RuntimeException If the file cannot be read.
+     * @throws \InvalidArgumentException If the JSON is malformed.
+     */
+    private function resolveModuleVersionEntry(string $moduleName, string $composerJsonPath, bool $isEnabled): array
+    {
+        if (!$this->file->isExists($composerJsonPath)) {
+            return ['name' => $moduleName, 'version' => 'Unknown', 'enabled' => $isEnabled];
+        }
+
+        $composerContent = $this->file->fileGetContents($composerJsonPath);
+        $composerData = $this->json->unserialize($composerContent);
+
+        return [
+            'name' => $composerData['name'] ?? $moduleName,
+            'version' => $composerData['version'] ?? 'Unknown',
+            'enabled' => $isEnabled,
+        ];
     }
 }
