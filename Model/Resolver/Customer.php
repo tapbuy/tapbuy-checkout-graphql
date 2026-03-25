@@ -78,10 +78,11 @@ class Customer implements ResolverInterface
      * Get customer ID
      *
      * @param CustomerInterface $customer
-     * @return int
+     * @return int|null
      */
-    private function getCustomerId(CustomerInterface $customer): int
+    private function getCustomerId(CustomerInterface $customer): ?int
     {
-        return $customer->getId();
+        $id = $customer->getId();
+        return $id !== null ? (int) $id : null;
     }
 }
