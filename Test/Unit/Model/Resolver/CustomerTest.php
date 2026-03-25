@@ -89,4 +89,40 @@ class CustomerTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    public function testReturnsNullWhenCustomerIdIsNull(): void
+    {
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->field->method('getName')->willReturn('tapbuy_customer_id');
+
+        $customer = $this->createMock(CustomerInterface::class);
+        $customer->method('getId')->willReturn(null);
+
+        $result = $this->resolver->resolve(
+            $this->field,
+            $this->context,
+            $this->info,
+            ['model' => $customer]
+        );
+
+        $this->assertNull($result);
+    }
+
+    public function testCastsStringCustomerIdToInt(): void
+    {
+        $this->config->method('isEnabled')->willReturn(true);
+        $this->field->method('getName')->willReturn('tapbuy_customer_id');
+
+        $customer = $this->createMock(CustomerInterface::class);
+        $customer->method('getId')->willReturn('42');
+
+        $result = $this->resolver->resolve(
+            $this->field,
+            $this->context,
+            $this->info,
+            ['model' => $customer]
+        );
+
+        $this->assertSame(42, $result);
+    }
 }
