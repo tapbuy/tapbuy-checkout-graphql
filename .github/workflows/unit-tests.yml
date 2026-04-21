@@ -25,19 +25,19 @@ jobs:
 
     steps:
       - name: Checkout module
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: module
 
       - name: Checkout redirect-tracking dependency
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: tapbuy/magento-redirect-plugin
           ref: ${{ env.REDIRECT_TRACKING_REF }}
           path: redirect-tracking-module
 
       - name: Checkout tapbuy/data-scrubber dependency
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: tapbuy/data-scrubber
           ref: ${{ env.DATA_SCRUBBER_REF }}
